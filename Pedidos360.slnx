@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pedidos360.Web/Pedidos360.Web.csproj" />
+  </Folder>
+</Solution>

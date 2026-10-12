@@ -1,0 +1,15 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# User secrets and local configuration
+secrets.json
+appsettings.Development.json
+
+# Logs
+*.log
