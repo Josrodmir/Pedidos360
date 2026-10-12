@@ -1,0 +1,11 @@
+@model (int PaginaActual, int TotalPaginas, Dictionary<string, string?> Parametros)
+@if (Model.TotalPaginas > 1)
+{
+    <nav class="mt-4" aria-label="Paginación"><ul class="pagination justify-content-center">
+        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+        {
+            var parametros = new Dictionary<string, string?>(Model.Parametros) { ["pagina"] = pagina.ToString() };
+            <li class="page-item @(pagina == Model.PaginaActual ? "active" : "")"><a class="page-link" asp-all-route-data="parametros">@pagina</a></li>
+        }
+    </ul></nav>
+}

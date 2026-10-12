@@ -1,0 +1,4 @@
+@model Cliente
+@{ ViewData["Title"] = "Editar cliente"; }
+<h1 class="h2 mb-4">Editar cliente</h1><form asp-action="Edit" class="card card-body shadow-sm border-0"><input type="hidden" asp-for="Id" /><partial name="_Form" model="Model" /><div class="mt-4 d-flex gap-2"><button class="btn btn-primary">Guardar cambios</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div></form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

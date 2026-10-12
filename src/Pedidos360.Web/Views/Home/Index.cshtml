@@ -1,8 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-panel rounded-4 p-4 p-md-5 mb-4 text-white">
+    <div class="row align-items-center">
+        <div class="col-md-8"><p class="text-uppercase fw-semibold small mb-2">Gestión comercial B2B</p><h1 class="display-6 fw-bold">Controla inventario y clientes en un solo lugar.</h1><p class="lead mb-4">Pedidos360 centraliza el catálogo, el inventario y la relación con tus clientes.</p><a asp-controller="Productos" asp-action="Index" class="btn btn-light btn-lg">Ver productos</a></div>
+        <div class="col-md-4 d-none d-md-block text-center"><span class="display-1">📦</span></div>
+    </div>
+</section>
+<section class="row g-4">
+    <div class="col-md-6"><a class="dashboard-card card h-100 text-decoration-none" asp-controller="Productos" asp-action="Index"><div class="card-body"><div class="fs-2 mb-3">🛒</div><h2 class="h4 text-dark">Catálogo de productos</h2><p class="text-secondary mb-0">Crea y administra precios, impuestos, existencias e imágenes.</p></div></a></div>
+    <div class="col-md-6"><a class="dashboard-card card h-100 text-decoration-none" asp-controller="Clientes" asp-action="Index"><div class="card-body"><div class="fs-2 mb-3">🤝</div><h2 class="h4 text-dark">Clientes</h2><p class="text-secondary mb-0">Consulta y mantiene actualizada la información de tus clientes.</p></div></a></div>
+</section>

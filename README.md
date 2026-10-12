@@ -12,13 +12,23 @@ Sistema web B2B para la gestión de inventario, clientes y pedidos. Desarrollado
 
 ## Estado del proyecto
 
-Primer avance en desarrollo: solución MVC base, autenticación Identity, modelo inicial de categorías, productos y clientes, y migración inicial de base de datos.
+Primer avance: CRUD de Productos y Clientes, validaciones cliente/servidor, filtros, paginación, modelo inicial EF Core y prototipo de interfaz. Los pedidos, roles y AJAX corresponden al siguiente hito.
 
 ## Ejecutar localmente
 
 1. Abra `Pedidos360.slnx` con Visual Studio.
-2. Configure la cadena `DefaultConnection` en User Secrets para SQL Server o Azure SQL.
+2. Configure la cadena `DefaultConnection` en User Secrets. Para Azure SQL use el formato siguiente, reemplazando solo `<PASSWORD>` localmente:
+
+   ```text
+   Server=tcp:pedidos360-josrodmir.database.windows.net,1433;Initial Catalog=Pedidos360DB;User ID=pedidos360admin@pedidos360-josrodmir;Password=<PASSWORD>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+   ```
+
 3. Ejecute `Update-Database` desde la Consola del Administrador de Paquetes.
 4. Presione F5 para iniciar la aplicación.
 
 > Las credenciales de Azure SQL nunca se guardan en el repositorio.
+
+## Documentación del avance
+
+- [Modelo ER y normalización](docs/modelo-er.md)
+- [Story map y criterios de aceptación](docs/story-map.md)

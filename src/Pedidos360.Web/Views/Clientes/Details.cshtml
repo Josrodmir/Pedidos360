@@ -1,0 +1,3 @@
+@model Cliente
+@{ ViewData["Title"] = "Detalle de cliente"; }
+<div class="d-flex justify-content-between align-items-center mb-4"><h1 class="h2 mb-0">@Model.Nombre</h1><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a></div><div class="card shadow-sm border-0"><div class="card-body"><dl class="row mb-0"><dt class="col-sm-3">Identificación</dt><dd class="col-sm-9">@Model.Cedula</dd><dt class="col-sm-3">Correo</dt><dd class="col-sm-9">@Model.Correo</dd><dt class="col-sm-3">Teléfono</dt><dd class="col-sm-9">@Model.Telefono</dd><dt class="col-sm-3">Dirección</dt><dd class="col-sm-9">@Model.Direccion</dd></dl></div></div><a asp-action="Index" class="btn btn-link mt-3">← Volver a clientes</a>

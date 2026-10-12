@@ -239,7 +239,27 @@ namespace Pedidos360.Web.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Nombre")
+                        .IsUnique();
+
                     b.ToTable("Categorias");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nombre = "Tecnología"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nombre = "Oficina"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Nombre = "Limpieza"
+                        });
                 });
 
             modelBuilder.Entity("Pedidos360.Web.Models.Cliente", b =>
@@ -276,6 +296,9 @@ namespace Pedidos360.Web.Data.Migrations
                         .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Cedula")
+                        .IsUnique();
 
                     b.ToTable("Clientes");
                 });
@@ -375,7 +398,7 @@ namespace Pedidos360.Web.Data.Migrations
                     b.HasOne("Pedidos360.Web.Models.Categoria", "Categoria")
                         .WithMany("Productos")
                         .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categoria");

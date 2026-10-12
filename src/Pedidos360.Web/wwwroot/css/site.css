@@ -19,7 +19,16 @@ html {
 
 body {
   margin-bottom: 60px;
+  background: #f6f7fb;
+  color: #1f2937;
 }
+
+.app-nav { background: linear-gradient(100deg, #35206d, #683db1); }
+.navbar-brand span { color: #f2cb5b; }
+.hero-panel { background: linear-gradient(115deg, #35206d, #6d42b4); }
+.dashboard-card { border: 0; box-shadow: 0 .25rem 1rem rgba(32, 22, 74, .09); transition: transform .15s ease, box-shadow .15s ease; }
+.dashboard-card:hover { transform: translateY(-3px); box-shadow: 0 .75rem 1.5rem rgba(32, 22, 74, .14); }
+.table thead th { background: #f0edfa; color: #392275; }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
