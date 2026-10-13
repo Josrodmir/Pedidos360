@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Conexión temporalmente no disponible";
+}
+
+<section class="text-center py-5">
+    <div class="mx-auto" style="max-width: 42rem;">
+        <p class="text-uppercase fw-semibold text-primary mb-2">Pedidos360</p>
+        <h1 class="display-6 fw-bold">Estamos reconectando con Azure SQL</h1>
+        <p class="lead text-muted mt-3">
+            La base de datos puede estar reanudándose o la conexión está tardando unos segundos.
+            No se perdió ninguna información.
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Ir al inicio</a>
+            <button class="btn btn-primary" type="button" onclick="window.location.reload()">Reintentar</button>
+        </div>
+    </div>
+</section>
