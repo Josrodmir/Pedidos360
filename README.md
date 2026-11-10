@@ -32,6 +32,12 @@ Segundo avance funcional: CRUD de productos y clientes, validaciones cliente/ser
 
 El repositorio incluye un `Dockerfile` para desplegar como **Web Service / Docker**. En Render configure la variable de entorno `ConnectionStrings__DefaultConnection` con la cadena de Azure SQL. No incluya la contraseña en GitHub ni en `appsettings.json`.
 
+### Roles y control de acceso
+
+ASP.NET Identity almacena las contraseñas como hashes, nunca como texto plano. Los perfiles de acceso son: **Administrador**, **Ventas**, **Contabilidad** e **Inventario**. Administración puede asignarlos desde `Usuarios`; Inventario gestiona catálogo, Ventas gestiona clientes y pedidos, y Contabilidad consulta pedidos.
+
+Al crear el primer usuario, asígnele el rol `Administrador` desde Azure SQL una sola vez; luego ese usuario administrará los demás perfiles desde la pantalla `Usuarios`.
+
 ## Documentación del avance
 
 - [Diagrama entidad-relación final](docs/diagrama-entidad-relacion-final.svg)

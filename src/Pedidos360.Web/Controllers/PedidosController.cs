@@ -5,16 +5,17 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Models;
+using Pedidos360.Web.Security;
 
 namespace Pedidos360.Web.Controllers;
 
 public class PedidosController(ApplicationDbContext context) : Controller
 {
-    [Authorize(Roles = "Admin,Ventas,Operaciones")]
+    [Authorize(Roles = AppRoles.PedidosLectura)]
     public async Task<IActionResult> Index() => View(await context.Pedidos.Include(p => p.Cliente).AsNoTracking().OrderByDescending(p => p.Fecha).ToListAsync());
-    [Authorize(Roles = "Admin,Ventas")]
+    [Authorize(Roles = AppRoles.PedidosGestion)]
     public async Task<IActionResult> Create() { await Clientes(); return View(); }
-    [Authorize(Roles = "Admin,Ventas")]
+    [Authorize(Roles = AppRoles.PedidosGestion)]
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(PedidoEntrada entrada)
     {
@@ -29,7 +30,7 @@ public class PedidosController(ApplicationDbContext context) : Controller
         pedido.Subtotal = pedido.Detalles.Sum(d => d.PrecioUnitario*d.Cantidad*(1-d.Descuento/100)); pedido.Impuestos = pedido.Detalles.Sum(d => d.PrecioUnitario*d.Cantidad*(1-d.Descuento/100)*d.ImpuestoPorc/100); pedido.Total=pedido.Subtotal+pedido.Impuestos;
         context.Pedidos.Add(pedido); await context.SaveChangesAsync(); TempData["Success"]="Pedido confirmado y stock actualizado."; return RedirectToAction(nameof(Details), new { id=pedido.Id });
     }
-    [Authorize(Roles = "Admin,Ventas,Operaciones")]
+    [Authorize(Roles = AppRoles.PedidosLectura)]
     public async Task<IActionResult> Details(int id) { var p=await context.Pedidos.Include(x=>x.Cliente).Include(x=>x.Detalles).ThenInclude(x=>x.Producto).AsNoTracking().FirstOrDefaultAsync(x=>x.Id==id); return p is null ? NotFound() : View(p); }
     private async Task Clientes() => ViewBag.ClienteId=new SelectList(await context.Clientes.OrderBy(c=>c.Nombre).ToListAsync(),"Id","Nombre");
 }

@@ -1,0 +1,12 @@
+@model IEnumerable<Pedidos360.Web.Models.UsuarioRolViewModel>
+@{
+    ViewData["Title"] = "Usuarios y roles";
+    var roles = (IReadOnlyList<string>)ViewBag.Roles;
+}
+<div class="page-heading"><h1>Usuarios y roles</h1><p>Solo Administración puede asignar el perfil de cada colaborador.</p></div>
+<div class="panel-card p-4"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Correo</th><th>Rol actual</th><th>Nuevo rol</th></tr></thead><tbody>
+@foreach (var usuario in Model)
+{
+    <tr><td>@usuario.Correo</td><td><span class="badge text-bg-secondary">@usuario.RolActual</span></td><td><form asp-action="CambiarRol" method="post" class="d-flex gap-2"><input type="hidden" name="usuarioId" value="@usuario.UsuarioId" /><select name="rol" class="form-select form-select-sm">@foreach (var rol in roles) { <option value="@rol" selected="@(rol == usuario.RolActual)">@rol</option> }</select><button class="btn btn-sm btn-primary">Guardar</button></form></td></tr>
+}
+</tbody></table></div></div>

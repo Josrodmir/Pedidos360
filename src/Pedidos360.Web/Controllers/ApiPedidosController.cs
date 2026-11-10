@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Models;
+using Pedidos360.Web.Security;
 
 namespace Pedidos360.Web.Controllers;
 
-[ApiController, Route("api/pedidos"), Authorize(Roles = "Admin,Ventas")]
+[ApiController, Route("api/pedidos"), Authorize(Roles = AppRoles.PedidosGestion)]
 public class ApiPedidosController(ApplicationDbContext context) : ControllerBase
 {
     [HttpPost("calcular")]

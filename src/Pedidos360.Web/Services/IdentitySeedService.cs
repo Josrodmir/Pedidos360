@@ -16,7 +16,7 @@ public sealed class IdentitySeedService(
             await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             using var scope = scopeFactory.CreateScope();
             await IdentitySeeder.SeedAsync(scope.ServiceProvider);
-            logger.LogInformation("Identity roles verified: Admin, Ventas and Operaciones.");
+            logger.LogInformation("Identity roles verified: Administrador, Ventas, Contabilidad and Inventario.");
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {

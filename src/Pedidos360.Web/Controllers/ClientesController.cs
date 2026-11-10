@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Models;
+using Pedidos360.Web.Security;
 
 namespace Pedidos360.Web.Controllers;
 
-[Authorize(Roles = "Admin,Ventas")]
+[Authorize(Roles = AppRoles.ClientesGestion)]
 public class ClientesController(ApplicationDbContext context) : Controller
 {
     private const int PageSize = 8;
