@@ -28,6 +28,10 @@ Segundo avance funcional: CRUD de productos y clientes, validaciones cliente/ser
 
 > Las credenciales de Azure SQL nunca se guardan en el repositorio.
 
+## Despliegue en Render
+
+El repositorio incluye un `Dockerfile` para desplegar como **Web Service / Docker**. En Render configure la variable de entorno `ConnectionStrings__DefaultConnection` con la cadena de Azure SQL. No incluya la contraseña en GitHub ni en `appsettings.json`.
+
 ## Documentación del avance
 
 - [Diagrama entidad-relación final](docs/diagrama-entidad-relacion-final.svg)
