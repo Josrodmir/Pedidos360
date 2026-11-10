@@ -12,7 +12,7 @@ Sistema web B2B para la gestión de inventario, clientes y pedidos. Desarrollado
 
 ## Estado del proyecto
 
-Primer avance: CRUD de Productos y Clientes, validaciones cliente/servidor, filtros, paginación, modelo inicial EF Core y prototipo de interfaz. Los pedidos, roles y AJAX corresponden al siguiente hito.
+Segundo avance funcional: CRUD de productos y clientes, validaciones cliente/servidor, filtros, paginación, almacenamiento de imágenes en la base de datos, ASP.NET Core Identity con roles, pedidos con actualización de inventario y API interna consumida con AJAX para buscar productos y calcular totales sin recargar la página.
 
 ## Ejecutar localmente
 
@@ -23,7 +23,7 @@ Primer avance: CRUD de Productos y Clientes, validaciones cliente/servidor, filt
    Server=tcp:pedidos360-josrodmir.database.windows.net,1433;Initial Catalog=Pedidos360DB;User ID=pedidos360admin@pedidos360-josrodmir;Password=<PASSWORD>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
    ```
 
-3. Ejecute `Update-Database` desde la Consola del Administrador de Paquetes.
+3. Ejecute `Update-Database` desde la Consola del Administrador de Paquetes. Esto aplica también la migración de `Pedidos` y `PedidoDetalles`.
 4. Presione F5 para iniciar la aplicación.
 
 > Las credenciales de Azure SQL nunca se guardan en el repositorio.
@@ -33,3 +33,4 @@ Primer avance: CRUD de Productos y Clientes, validaciones cliente/servidor, filt
 - [Diagrama entidad-relación final](docs/diagrama-entidad-relacion-final.svg)
 - [Story map y criterios de aceptación](docs/story-map.md)
 - [Guía para el caso de estudio](docs/guia-caso-estudio.md)
+- [Checklist de pruebas del hito 2](docs/checklist-hito-2.md)

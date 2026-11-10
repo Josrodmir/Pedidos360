@@ -43,12 +43,14 @@ public class ProductosController(ApplicationDbContext context) : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Operaciones")]
     public async Task<IActionResult> Create()
     {
         await CargarCategoriasAsync();
         return View(new Producto());
     }
 
+    [Authorize(Roles = "Admin,Operaciones")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Producto producto)
@@ -73,6 +75,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Operaciones")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id is null) return NotFound();
@@ -82,6 +85,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
         return View(producto);
     }
 
+    [Authorize(Roles = "Admin,Operaciones")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Producto producto)
@@ -141,6 +145,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
             : NotFound();
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id is null) return NotFound();

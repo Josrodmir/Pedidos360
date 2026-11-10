@@ -1,6 +1,86 @@
-(() => { const q=document.querySelector('#buscarProducto'), r=document.querySelector('#resultados'), lines=document.querySelector('#lineas'); let timer;
- q?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(async()=>{const data=await fetch(`/api/productos/buscar?q=${encodeURIComponent(q.value)}`).then(x=>x.json());r.innerHTML=data.map(p=>`<button type="button" class="list-group-item" data-id="${p.id}" data-name="${p.nombre}">${p.nombre} · stock ${p.stock}</button>`).join('');},250)});
- r?.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(lines.querySelector(`[data-id="${b.dataset.id}"]`))return;lines.insertAdjacentHTML('beforeend',`<tr data-id="${b.dataset.id}"><td>${b.dataset.name}<input type="hidden" name="Lineas[${lines.children.length}].ProductoId" value="${b.dataset.id}"></td><td><input class="form-control calc" name="Lineas[${lines.children.length}].Cantidad" type="number" min="1" value="1"></td><td><input class="form-control calc" name="Lineas[${lines.children.length}].Descuento" type="number" min="0" max="100" value="0"></td><td><button type="button" class="btn btn-sm btn-outline-danger quitar">×</button></td></tr>`);r.innerHTML='';q.value='';calcular();});
- lines?.addEventListener('input',calcular);lines?.addEventListener('click',e=>{if(e.target.classList.contains('quitar')){e.target.closest('tr').remove();calcular();}});
- async function calcular(){const l=[...lines.children].map(x=>({productoId:+x.dataset.id,cantidad:+x.querySelector('[name$=".Cantidad"]').value,descuento:+x.querySelector('[name$=".Descuento"]').value}));if(!l.length){document.querySelector('#totales').textContent='Total: ₡0.00';return;}const x=await fetch('/api/pedidos/calcular',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(l)});if(x.ok){const d=await x.json();document.querySelector('#totales').textContent=`Subtotal: ₡${d.subtotal.toFixed(2)} · Impuestos: ₡${d.impuestos.toFixed(2)} · Total: ₡${d.total.toFixed(2)}`;}}
+(() => {
+    const search = document.querySelector("#buscarProducto");
+    const results = document.querySelector("#resultados");
+    const lines = document.querySelector("#lineas");
+    const totals = document.querySelector("#totales");
+    let timer;
+
+    search?.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(searchProducts, 250);
+    });
+
+    async function searchProducts() {
+        const response = await fetch(`/api/productos/buscar?q=${encodeURIComponent(search.value)}`);
+        if (!response.ok) {
+            results.innerHTML = '<div class="list-group-item text-muted">No se pudo consultar el catálogo.</div>';
+            return;
+        }
+
+        const products = await response.json();
+        results.innerHTML = products.map(product =>
+            `<button type="button" class="list-group-item" data-id="${product.id}" data-name="${product.nombre}">
+                ${product.nombre} · ₡${product.precio.toFixed(2)} · stock ${product.stock}
+             </button>`).join("");
+    }
+
+    results?.addEventListener("click", event => {
+        const button = event.target.closest("button");
+        if (!button || lines.querySelector(`[data-id="${button.dataset.id}"]`)) return;
+
+        lines.insertAdjacentHTML("beforeend", `
+            <tr data-id="${button.dataset.id}">
+                <td>${button.dataset.name}<input type="hidden" value="${button.dataset.id}"></td>
+                <td><input class="form-control calc" type="number" min="1" value="1"></td>
+                <td><input class="form-control calc" type="number" min="0" max="100" value="0"></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger quitar" aria-label="Quitar producto">×</button></td>
+            </tr>`);
+        results.innerHTML = "";
+        search.value = "";
+        reindexLines();
+        calculate();
+    });
+
+    lines?.addEventListener("input", calculate);
+    lines?.addEventListener("click", event => {
+        if (!event.target.classList.contains("quitar")) return;
+        event.target.closest("tr").remove();
+        reindexLines();
+        calculate();
+    });
+
+    function reindexLines() {
+        [...lines.children].forEach((row, index) => {
+            const [productId, quantity, discount] = row.querySelectorAll("input");
+            productId.name = `Lineas[${index}].ProductoId`;
+            quantity.name = `Lineas[${index}].Cantidad`;
+            discount.name = `Lineas[${index}].Descuento`;
+        });
+    }
+
+    async function calculate() {
+        const orderLines = [...lines.children].map(row => {
+            const [productId, quantity, discount] = row.querySelectorAll("input");
+            return { productoId: +productId.value, cantidad: +quantity.value, descuento: +discount.value };
+        });
+
+        if (!orderLines.length) {
+            totals.textContent = "Total: ₡0.00";
+            return;
+        }
+
+        const response = await fetch("/api/pedidos/calcular", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderLines)
+        });
+
+        if (!response.ok) {
+            totals.textContent = "No se pudieron calcular los totales. Revise las cantidades.";
+            return;
+        }
+
+        const data = await response.json();
+        totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
+    }
 })();

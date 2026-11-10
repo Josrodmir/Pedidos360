@@ -23,6 +23,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<DatabaseUnavailableFilter>());
 builder.Services.AddHostedService<DatabaseWarmupService>();
+builder.Services.AddHostedService<IdentitySeedService>();
 
 var app = builder.Build();
 

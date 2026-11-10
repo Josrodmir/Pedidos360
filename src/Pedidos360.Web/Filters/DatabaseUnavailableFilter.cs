@@ -29,6 +29,6 @@ public sealed class DatabaseUnavailableFilter : IAsyncExceptionFilter
 
     private static bool IsDatabaseUnavailable(Exception exception) =>
         exception is RetryLimitExceededException ||
-        exception is SqlException { Number: 40613 or -2 } ||
+        exception is SqlException { Number: 40613 or 40925 or -2 } ||
         exception.InnerException is not null && IsDatabaseUnavailable(exception.InnerException);
 }
