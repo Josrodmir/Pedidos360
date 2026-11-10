@@ -26,6 +26,11 @@ builder.Services.AddHostedService<DatabaseWarmupService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -39,6 +44,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
 app.UseRouting();
 
 app.UseAuthentication();

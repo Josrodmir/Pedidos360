@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Models;
 
 namespace Pedidos360.Web.Controllers;
 
+[Authorize(Roles = "Admin,Ventas")]
 public class ClientesController(ApplicationDbContext context) : Controller
 {
     private const int PageSize = 8;

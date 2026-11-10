@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Models;
 
 namespace Pedidos360.Web.Controllers;
 
+[Authorize]
 public class ProductosController(ApplicationDbContext context) : Controller
 {
     private const int PageSize = 8;
@@ -146,6 +148,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
         return producto is null ? NotFound() : View(producto);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
