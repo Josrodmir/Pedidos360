@@ -28,7 +28,15 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+    try
+    {
+        await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+    }
+    catch (Exception exception)
+    {
+        // Azure SQL serverless can be paused. Do not prevent the web server from starting.
+        app.Logger.LogWarning(exception, "Identity seed deferred because the database is unavailable.");
+    }
 }
 
 // Configure the HTTP request pipeline.
