@@ -303,6 +303,82 @@ namespace Pedidos360.Web.Data.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("Pedidos360.Web.Models.Pedido", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Impuestos")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.ToTable("Pedidos");
+                });
+
+            modelBuilder.Entity("Pedidos360.Web.Models.PedidoDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Descuento")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("ImpuestoPorc")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("PedidoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalLinea")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PedidoId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("PedidoDetalles");
+                });
+
             modelBuilder.Entity("Pedidos360.Web.Models.Producto", b =>
                 {
                     b.Property<int>("Id")
@@ -317,9 +393,16 @@ namespace Pedidos360.Web.Data.Migrations
                     b.Property<int>("CategoriaId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ImagenUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("ImagenBytes")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ImagenTipo")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImagenUrlLegado")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ImagenUrl");
 
                     b.Property<decimal>("ImpuestoPorc")
                         .HasColumnType("decimal(5,2)");
@@ -393,6 +476,36 @@ namespace Pedidos360.Web.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Pedidos360.Web.Models.Pedido", b =>
+                {
+                    b.HasOne("Pedidos360.Web.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("Pedidos360.Web.Models.PedidoDetalle", b =>
+                {
+                    b.HasOne("Pedidos360.Web.Models.Pedido", "Pedido")
+                        .WithMany("Detalles")
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pedidos360.Web.Models.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Pedido");
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("Pedidos360.Web.Models.Producto", b =>
                 {
                     b.HasOne("Pedidos360.Web.Models.Categoria", "Categoria")
@@ -407,6 +520,11 @@ namespace Pedidos360.Web.Data.Migrations
             modelBuilder.Entity("Pedidos360.Web.Models.Categoria", b =>
                 {
                     b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("Pedidos360.Web.Models.Pedido", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 #pragma warning restore 612, 618
         }

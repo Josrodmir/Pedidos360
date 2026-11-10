@@ -9,6 +9,8 @@ namespace Pedidos360.Web.Controllers;
 public class ProductosController(ApplicationDbContext context) : Controller
 {
     private const int PageSize = 8;
+    private const long MaxImageSizeBytes = 2 * 1024 * 1024;
+    private static readonly HashSet<string> AllowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
     public async Task<IActionResult> Index(string? busqueda, int? categoriaId, int pagina = 1)
     {
@@ -54,12 +56,15 @@ public class ProductosController(ApplicationDbContext context) : Controller
             ModelState.AddModelError(nameof(producto.CategoriaId), "Seleccione una categoría válida.");
         }
 
+        ValidarImagen(producto.ImagenArchivo, requerida: true);
+
         if (!ModelState.IsValid)
         {
             await CargarCategoriasAsync(producto.CategoriaId);
             return View(producto);
         }
 
+        await GuardarImagenAsync(producto, producto.ImagenArchivo!);
         context.Add(producto);
         await context.SaveChangesAsync();
         TempData["Success"] = "Producto creado correctamente.";
@@ -80,10 +85,15 @@ public class ProductosController(ApplicationDbContext context) : Controller
     public async Task<IActionResult> Edit(int id, Producto producto)
     {
         if (id != producto.Id) return NotFound();
+        var productoExistente = await context.Productos.FindAsync(id);
+        if (productoExistente is null) return NotFound();
+
         if (!await context.Categorias.AnyAsync(c => c.Id == producto.CategoriaId))
         {
             ModelState.AddModelError(nameof(producto.CategoriaId), "Seleccione una categoría válida.");
         }
+
+        ValidarImagen(producto.ImagenArchivo, requerida: false);
 
         if (!ModelState.IsValid)
         {
@@ -91,16 +101,19 @@ public class ProductosController(ApplicationDbContext context) : Controller
             return View(producto);
         }
 
-        try
+        productoExistente.Nombre = producto.Nombre;
+        productoExistente.CategoriaId = producto.CategoriaId;
+        productoExistente.Precio = producto.Precio;
+        productoExistente.ImpuestoPorc = producto.ImpuestoPorc;
+        productoExistente.Stock = producto.Stock;
+        productoExistente.Activo = producto.Activo;
+
+        if (producto.ImagenArchivo is not null)
         {
-            context.Update(producto);
-            await context.SaveChangesAsync();
+            await GuardarImagenAsync(productoExistente, producto.ImagenArchivo);
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await context.Productos.AnyAsync(p => p.Id == producto.Id)) return NotFound();
-            throw;
-        }
+
+        await context.SaveChangesAsync();
 
         TempData["Success"] = "Producto actualizado correctamente.";
         return RedirectToAction(nameof(Index));
@@ -111,6 +124,19 @@ public class ProductosController(ApplicationDbContext context) : Controller
         if (id is null) return NotFound();
         var producto = await context.Productos.Include(p => p.Categoria).AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
         return producto is null ? NotFound() : View(producto);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Imagen(int id)
+    {
+        var imagen = await context.Productos.AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new { p.ImagenBytes, p.ImagenTipo })
+            .FirstOrDefaultAsync();
+
+        return imagen?.ImagenBytes is { Length: > 0 }
+            ? File(imagen.ImagenBytes, imagen.ImagenTipo ?? "application/octet-stream")
+            : NotFound();
     }
 
     public async Task<IActionResult> Delete(int? id)
@@ -136,4 +162,35 @@ public class ProductosController(ApplicationDbContext context) : Controller
 
     private async Task CargarCategoriasAsync(object? seleccionada = null) =>
         ViewBag.CategoriaId = new SelectList(await context.Categorias.OrderBy(c => c.Nombre).ToListAsync(), "Id", "Nombre", seleccionada);
+
+    private void ValidarImagen(IFormFile? archivo, bool requerida)
+    {
+        if (archivo is null || archivo.Length == 0)
+        {
+            if (requerida)
+            {
+                ModelState.AddModelError(nameof(Producto.ImagenArchivo), "Seleccione una imagen JPG, PNG o WEBP.");
+            }
+            return;
+        }
+
+        if (!AllowedImageTypes.Contains(archivo.ContentType))
+        {
+            ModelState.AddModelError(nameof(Producto.ImagenArchivo), "La imagen debe ser JPG, PNG o WEBP.");
+        }
+
+        if (archivo.Length > MaxImageSizeBytes)
+        {
+            ModelState.AddModelError(nameof(Producto.ImagenArchivo), "La imagen no puede superar 2 MB.");
+        }
+    }
+
+    private static async Task GuardarImagenAsync(Producto producto, IFormFile archivo)
+    {
+        await using var stream = new MemoryStream();
+        await archivo.CopyToAsync(stream);
+        producto.ImagenBytes = stream.ToArray();
+        producto.ImagenTipo = archivo.ContentType;
+        producto.ImagenUrlLegado = null;
+    }
 }

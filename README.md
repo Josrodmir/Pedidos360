@@ -30,5 +30,6 @@ Primer avance: CRUD de Productos y Clientes, validaciones cliente/servidor, filt
 
 ## Documentación del avance
 
-- [Modelo ER y normalización](docs/modelo-er.md)
+- [Diagrama entidad-relación final](docs/diagrama-entidad-relacion-final.svg)
 - [Story map y criterios de aceptación](docs/story-map.md)
+- [Guía para el caso de estudio](docs/guia-caso-estudio.md)

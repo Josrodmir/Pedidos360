@@ -30,9 +30,10 @@
         <span asp-validation-for="Stock" class="text-danger"></span>
     </div>
     <div class="col-12">
-        <label asp-for="ImagenUrl" class="form-label"></label>
-        <input asp-for="ImagenUrl" class="form-control" placeholder="https://..." />
-        <span asp-validation-for="ImagenUrl" class="text-danger"></span>
+        <label asp-for="ImagenArchivo" class="form-label"></label>
+        <input asp-for="ImagenArchivo" type="file" class="form-control" accept="image/jpeg,image/png,image/webp" />
+        <div class="form-text">JPG, PNG o WEBP. Tamaño máximo: 2 MB. Al editar, deje vacío este campo para conservar la imagen actual.</div>
+        <span asp-validation-for="ImagenArchivo" class="text-danger"></span>
     </div>
     <div class="col-12">
         <div class="form-check form-switch">

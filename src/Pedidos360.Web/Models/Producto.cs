@@ -18,8 +18,18 @@ public class Producto
     [Column(TypeName = "decimal(5,2)")] public decimal ImpuestoPorc { get; set; }
     [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
     public int Stock { get; set; }
-    [Required(ErrorMessage = "La imagen es obligatoria al crear un producto.")]
-    [Url(ErrorMessage = "Ingrese una URL de imagen válida.")]
-    [Display(Name = "URL de imagen")] public string ImagenUrl { get; set; } = string.Empty;
+    // Maintains the previous URL values during the migration. New images are stored as bytes.
+    [Column("ImagenUrl")]
+    public string? ImagenUrlLegado { get; set; }
+
+    [Column(TypeName = "varbinary(max)")]
+    public byte[]? ImagenBytes { get; set; }
+
+    [StringLength(100)]
+    public string? ImagenTipo { get; set; }
+
+    [NotMapped]
+    [Display(Name = "Imagen del producto")]
+    public IFormFile? ImagenArchivo { get; set; }
     public bool Activo { get; set; } = true;
 }

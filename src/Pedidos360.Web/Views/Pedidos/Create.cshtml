@@ -1,0 +1,4 @@
+@model PedidoEntrada
+@{ ViewData["Title"]="Nuevo pedido"; }
+<h1>Nuevo pedido</h1><form asp-action="Create" id="pedidoForm"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="mb-3"><label>Cliente</label><select asp-for="ClienteId" asp-items="ViewBag.ClienteId" class="form-select"><option value="">Seleccione...</option></select></div><div class="mb-3"><label>Buscar producto</label><input id="buscarProducto" class="form-control" autocomplete="off"/><div id="resultados" class="list-group"></div></div><table class="table"><thead><tr><th>Producto</th><th>Cant.</th><th>Desc. %</th><th></th></tr></thead><tbody id="lineas"></tbody></table><div class="text-end"><strong id="totales">Total: ₡0.00</strong></div><button class="btn btn-primary mt-3">Confirmar pedido</button></form>
+@section Scripts { <partial name="_ValidationScriptsPartial"/><script src="~/js/pedidos.js" asp-append-version="true"></script> }

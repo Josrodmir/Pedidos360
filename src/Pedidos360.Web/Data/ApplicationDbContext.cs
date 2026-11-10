@@ -9,6 +9,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Producto> Productos => Set<Producto>();
     public DbSet<Cliente> Clientes => Set<Cliente>();
+    public DbSet<Pedido> Pedidos => Set<Pedido>();
+    public DbSet<PedidoDetalle> PedidoDetalles => Set<PedidoDetalle>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -21,6 +23,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany(c => c.Productos)
             .HasForeignKey(p => p.CategoriaId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<Pedido>().HasOne(p => p.Cliente).WithMany().HasForeignKey(p => p.ClienteId).OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<PedidoDetalle>().HasOne(d => d.Pedido).WithMany(p => p.Detalles).HasForeignKey(d => d.PedidoId).OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<PedidoDetalle>().HasOne(d => d.Producto).WithMany().HasForeignKey(d => d.ProductoId).OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Categoria>().HasData(
             new Categoria { Id = 1, Nombre = "Tecnología" },

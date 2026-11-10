@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pedidos360 — Prototipo de vistas finales</title>
+  <style>
+    :root { --navy:#102a43; --blue:#1769aa; --cyan:#2e90c9; --pale:#eaf3f8; --ink:#18212f; --slate:#52606d; --green:#16825d; --amber:#bf7600; --line:#d9e2ec; }
+    * { box-sizing:border-box; } body { margin:0; background:#edf3f7; color:var(--ink); font-family:Aptos,Arial,sans-serif; }
+    header { background:var(--navy); color:white; padding:30px max(5vw,32px); } header h1 { margin:0; font-size:30px; } header p { margin:8px 0 0; color:#c9e6f7; }
+    .intro { max-width:1250px; margin:26px auto 4px; padding:0 24px; color:var(--slate); }
+    .mockup { max-width:1250px; min-height:700px; margin:32px auto 56px; display:grid; grid-template-columns:225px 1fr; background:white; border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 14px 35px #102a4318; }
+    aside { background:var(--navy); color:#d8e8f2; padding:28px 18px; } .brand { font-size:23px; font-weight:800; color:white; margin:0 0 38px; }
+    .nav { display:grid; gap:8px; } .nav div { padding:11px 13px; border-radius:9px; font-size:15px; } .nav .active { background:#1d527c; color:white; font-weight:700; }
+    main { padding:30px 36px 40px; min-width:0; } .top { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; border-bottom:1px solid var(--line); padding-bottom:20px; } h2 { font-size:28px; margin:0; } .muted { color:var(--slate); margin:8px 0 0; } button { border:0; border-radius:8px; background:var(--blue); color:white; padding:11px 15px; font-weight:700; white-space:nowrap; }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:25px; } .card { border:1px solid var(--line); border-radius:12px; padding:18px; background:#fff; } .card .label { color:var(--slate); font-size:14px; } .metric { font-size:30px; font-weight:800; margin-top:8px; } .ok { color:var(--green); } .warning { color:var(--amber); }
+    .section { margin-top:27px; } .section h3 { font-size:18px; margin:0 0 14px; } .panel { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; font-size:14px; } th { text-align:left; background:#f6f9fb; color:var(--slate); font-weight:700; } th, td { padding:13px 14px; border-bottom:1px solid #edf1f4; } tr:last-child td { border-bottom:0; } .tag { display:inline-block; border-radius:999px; padding:4px 9px; font-size:12px; font-weight:700; } .tag.green { background:#def4ea; color:#0e6548; } .tag.amber { background:#fff0cf; color:#875000; }
+    .filters { display:grid; grid-template-columns:1.5fr 1fr auto; gap:12px; margin:24px 0 16px; } input, select { border:1px solid #b9c9d6; border-radius:8px; padding:11px 12px; font:inherit; color:var(--slate); background:white; }
+    .two { display:grid; grid-template-columns:1.15fr .85fr; gap:22px; margin-top:25px; } .form { border:1px solid var(--line); border-radius:12px; padding:20px; } .form h3 { margin-top:0; } .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; } label { display:grid; gap:6px; color:var(--slate); font-size:14px; font-weight:700; } .summary { background:var(--pale); border:1px solid #b9dcec; border-radius:12px; padding:20px; } .summary .total { display:flex; justify-content:space-between; font-size:24px; font-weight:800; margin-top:20px; padding-top:14px; border-top:1px solid #b9dcec; }
+    .callout { margin-top:18px; padding:14px 16px; border-left:5px solid var(--green); background:#f2fbf7; color:#245849; border-radius:7px; }
+    .footer-note { max-width:1250px; margin:-35px auto 42px; padding:0 24px; color:var(--slate); font-size:14px; }
+    @media(max-width:800px) { .mockup { margin:20px 14px 40px; grid-template-columns:1fr; } aside { padding:18px; } .nav { grid-template-columns:repeat(3,1fr); } .brand { margin-bottom:18px; } main { padding:24px 18px; } .grid,.two { grid-template-columns:1fr; } .filters,.form-grid { grid-template-columns:1fr; } .top { flex-direction:column; } table { font-size:12px; } th,td { padding:10px 7px; } }
+  </style>
+</head>
+<body>
+  <header><h1>Pedidos360 · Prototipo de vistas finales</h1><p>Propuesta de interfaz para la entrega final: inventario, clientes, pedidos y seguridad.</p></header>
+  <p class="intro">Las siguientes pantallas son una maqueta visual. Los datos son de ejemplo y las funciones de Pedidos, roles y AJAX corresponden al siguiente hito.</p>
+
+  <section class="mockup">
+    <aside><div class="brand">Pedidos360</div><div class="nav"><div class="active">▦ Panel principal</div><div>▣ Productos</div><div>♙ Clientes</div><div>▤ Pedidos</div><div>⌁ Reportes</div><div>⚙ Administración</div></div></aside>
+    <main><div class="top"><div><h2>Panel principal</h2><p class="muted">Resumen operativo de inventario y ventas.</p></div><button>+ Nuevo pedido</button></div>
+      <div class="grid"><div class="card"><div class="label">Productos activos</div><div class="metric">128</div><span class="tag green">Catálogo actualizado</span></div><div class="card"><div class="label">Stock bajo</div><div class="metric warning">6</div><span class="tag amber">Requiere atención</span></div><div class="card"><div class="label">Pedidos del mes</div><div class="metric">42</div><span class="tag green">+12% vs. anterior</span></div><div class="card"><div class="label">Clientes activos</div><div class="metric">36</div><span class="tag green">Información completa</span></div></div>
+      <div class="two"><div class="section"><h3>Últimos pedidos</h3><div class="panel"><table><tr><th>Número</th><th>Cliente</th><th>Estado</th><th>Total</th></tr><tr><td>#P-1042</td><td>Distribuidora Central</td><td><span class="tag green">Confirmado</span></td><td>₡185.400</td></tr><tr><td>#P-1041</td><td>Comercial La Bodega</td><td><span class="tag amber">Borrador</span></td><td>₡74.250</td></tr></table></div></div><div class="summary"><h3>Alertas de inventario</h3><p>Resma papel carta · 8 unidades</p><p>Teclado inalámbrico · 4 unidades</p><p>Desinfectante 1 L · 6 unidades</p><div class="callout">Operaciones puede revisar existencias y actualizar el catálogo.</div></div></div>
+    </main>
+  </section>
+
+  <section class="mockup">
+    <aside><div class="brand">Pedidos360</div><div class="nav"><div>▦ Panel principal</div><div class="active">▣ Productos</div><div>♙ Clientes</div><div>▤ Pedidos</div><div>⌁ Reportes</div><div>⚙ Administración</div></div></aside>
+    <main><div class="top"><div><h2>Catálogo de productos</h2><p class="muted">Consulta, filtra y administra el inventario disponible.</p></div><button>+ Crear producto</button></div><div class="filters"><input value="Buscar por nombre o código"><select><option>Todas las categorías</option><option>Tecnología</option><option>Oficina</option></select><button>Buscar</button></div><div class="panel"><table><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr><tr><td>Teclado inalámbrico</td><td>Tecnología</td><td>₡18.500</td><td>24</td><td><span class="tag green">Activo</span></td><td>Editar · Eliminar</td></tr><tr><td>Resma papel carta</td><td>Oficina</td><td>₡3.200</td><td>8</td><td><span class="tag green">Activo</span></td><td>Editar · Eliminar</td></tr><tr><td>Desinfectante 1 L</td><td>Limpieza</td><td>₡2.450</td><td>35</td><td><span class="tag green">Activo</span></td><td>Editar · Eliminar</td></tr></table></div><div class="callout">Validaciones: nombre obligatorio, precio mayor a cero, impuesto entre 0 y 100, stock no negativo e imagen requerida.</div></main>
+  </section>
+
+  <section class="mockup">
+    <aside><div class="brand">Pedidos360</div><div class="nav"><div>▦ Panel principal</div><div>▣ Productos</div><div class="active">♙ Clientes</div><div>▤ Pedidos</div><div>⌁ Reportes</div><div>⚙ Administración</div></div></aside>
+    <main><div class="top"><div><h2>Clientes B2B</h2><p class="muted">Información de contacto y consulta por nombre o identificación.</p></div><button>+ Crear cliente</button></div><div class="filters"><input value="Buscar por nombre o cédula"><select><option>Todos los clientes</option></select><button>Buscar</button></div><div class="panel"><table><tr><th>Cliente</th><th>Cédula / Jurídica</th><th>Correo</th><th>Teléfono</th><th>Acciones</th></tr><tr><td>Distribuidora Central S.A.</td><td>3-101-456789</td><td>ventas@central.cr</td><td>2222-1000</td><td>Ver · Editar</td></tr><tr><td>Comercial La Bodega</td><td>3-101-987654</td><td>compras@labodega.cr</td><td>2233-2000</td><td>Ver · Editar</td></tr></table></div><div class="callout">La cédula es única. El formulario valida correo, campos requeridos y evita registros duplicados.</div></main>
+  </section>
+
+  <section class="mockup">
+    <aside><div class="brand">Pedidos360</div><div class="nav"><div>▦ Panel principal</div><div>▣ Productos</div><div>♙ Clientes</div><div class="active">▤ Pedidos</div><div>⌁ Reportes</div><div>⚙ Administración</div></div></aside>
+    <main><div class="top"><div><h2>Crear pedido</h2><p class="muted">Ventas agrega productos mediante búsqueda AJAX y confirma el pedido.</p></div><button>Guardar borrador</button></div><div class="two"><div><div class="form"><h3>Datos del pedido</h3><div class="form-grid"><label>Cliente<select><option>Distribuidora Central S.A.</option></select></label><label>Fecha<input value="14/10/2026"></label></div><h3 style="margin-top:24px">Agregar producto</h3><div class="filters" style="grid-template-columns:1fr auto;margin:0"><input value="Buscar por nombre o código…"><button>Agregar</button></div></div><div class="section"><div class="panel"><table><tr><th>Producto</th><th>Cant.</th><th>P. unitario</th><th>Desc.</th><th>Total</th></tr><tr><td>Teclado inalámbrico</td><td>2</td><td>₡18.500</td><td>0%</td><td>₡37.000</td></tr><tr><td>Resma papel carta</td><td>10</td><td>₡3.200</td><td>5%</td><td>₡30.400</td></tr></table></div></div></div><div class="summary"><h3>Resumen</h3><p>Subtotal <strong style="float:right">₡67.400</strong></p><p>Descuento <strong style="float:right">₡1.600</strong></p><p>Impuestos <strong style="float:right">₡8.554</strong></p><div class="total"><span>Total</span><span>₡74.354</span></div><button style="width:100%;margin-top:20px">Confirmar pedido</button><div class="callout">Al confirmar: se guarda la auditoría, se descuenta stock y se registra el usuario.</div></div></div>
+    </main>
+  </section>
+
+  <section class="mockup">
+    <aside><div class="brand">Pedidos360</div><div class="nav"><div>▦ Panel principal</div><div>▣ Productos</div><div>♙ Clientes</div><div>▤ Pedidos</div><div>⌁ Reportes</div><div class="active">⚙ Administración</div></div></aside>
+    <main><div class="top"><div><h2>Usuarios y roles</h2><p class="muted">Seguridad basada en roles de ASP.NET Identity.</p></div><button>+ Invitar usuario</button></div><div class="panel" style="margin-top:25px"><table><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Permisos principales</th><th>Estado</th></tr><tr><td>Administrador</td><td>admin@empresa.cr</td><td><span class="tag green">Admin</span></td><td>Acceso total</td><td>Activo</td></tr><tr><td>Ana Morales</td><td>ventas@empresa.cr</td><td><span class="tag green">Ventas</span></td><td>Pedidos y catálogo</td><td>Activo</td></tr><tr><td>Luis Rojas</td><td>operaciones@empresa.cr</td><td><span class="tag amber">Operaciones</span></td><td>Inventario y pedidos</td><td>Activo</td></tr></table></div><div class="callout">Admin: acceso total. Ventas: crea y consulta pedidos. Operaciones: administra inventario y consulta pedidos.</div></main>
+  </section>
+  <p class="footer-note">Pedidos360 · Prototipo de interfaz final. El modelo es editable como HTML y se puede usar como referencia para las Razor Views del proyecto.</p>
+</body>
+</html>

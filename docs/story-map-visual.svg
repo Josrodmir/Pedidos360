@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Story Map visual de Pedidos360</title>
+  <desc id="desc">Mapa de historias para catálogo, clientes, pedidos, API, seguridad y entrega de Pedidos360.</desc>
+  <style>
+    .bg { fill:#f6f9fc; } .title { font:800 48px Aptos,Arial,sans-serif; fill:#102a43; letter-spacing:3px; }
+    .subtitle { font:400 18px Aptos,Arial,sans-serif; fill:#52606d; } .col { fill:#1769aa; } .colText { font:700 17px Aptos,Arial,sans-serif; fill:#fff; }
+    .phase { font:800 17px Aptos,Arial,sans-serif; fill:#52606d; } .line { stroke:#c8d5df; stroke-width:2; stroke-dasharray:5 7; }
+    .done { fill:#e1f4ec; stroke:#b7e0ce; stroke-width:1.5; } .plan { fill:#fff7e5; stroke:#ecd99f; stroke-width:1.5; } .bonus { fill:#f3f5f7; stroke:#d9e2ec; stroke-width:1.5; }
+    .barDone { fill:#16825d; } .barPlan { fill:#bf7600; } .barBonus { fill:#52606d; } .cardText { font:600 15px Aptos,Arial,sans-serif; fill:#18212f; }
+    .legend { font:600 15px Aptos,Arial,sans-serif; fill:#52606d; }
+  </style>
+  <rect class="bg" width="1920" height="1080"/>
+  <rect x="0" y="0" width="1920" height="12" fill="#2e90c9"/>
+  <text class="title" x="720" y="92">STORY MAP</text>
+  <text class="subtitle" x="690" y="126">Pedidos360 · Inventario y pedidos B2B</text>
+  <rect x="70" y="156" width="1780" height="850" rx="16" fill="#fff" stroke="#d9e2ec" stroke-width="2"/>
+
+  <!-- Columns -->
+  <g>
+    <rect class="col" x="112" y="194" width="260" height="48" rx="9"/><text class="colText" x="214" y="224">CATÁLOGO</text>
+    <rect class="col" x="398" y="194" width="260" height="48" rx="9"/><text class="colText" x="492" y="224">CLIENTES</text>
+    <rect class="col" x="684" y="194" width="260" height="48" rx="9"/><text class="colText" x="783" y="224">PEDIDOS</text>
+    <rect class="col" x="970" y="194" width="260" height="48" rx="9"/><text class="colText" x="1058" y="224">API / AJAX</text>
+    <rect class="col" x="1256" y="194" width="260" height="48" rx="9"/><text class="colText" x="1290" y="224">SEGURIDAD Y ERRORES</text>
+    <rect class="col" x="1542" y="194" width="260" height="48" rx="9"/><text class="colText" x="1592" y="224">ENTREGA Y CALIDAD</text>
+  </g>
+
+  <!-- Hito 1 -->
+  <text class="phase" x="112" y="278">HITO 1 — AVANCE FUNCIONAL</text>
+  <g>
+    <rect class="done" x="112" y="294" width="260" height="35" rx="7"/><rect class="barDone" x="112" y="294" width="6" height="35"/><text class="cardText" x="130" y="317">Listar productos con filtros</text>
+    <rect class="done" x="112" y="338" width="260" height="35" rx="7"/><rect class="barDone" x="112" y="338" width="6" height="35"/><text class="cardText" x="130" y="361">Crear producto con imagen binaria</text>
+    <rect class="done" x="112" y="382" width="260" height="35" rx="7"/><rect class="barDone" x="112" y="382" width="6" height="35"/><text class="cardText" x="130" y="405">Editar, activar y validar producto</text>
+    <rect class="done" x="112" y="426" width="260" height="35" rx="7"/><rect class="barDone" x="112" y="426" width="6" height="35"/><text class="cardText" x="130" y="449">Administrar categorías</text>
+
+    <rect class="done" x="398" y="294" width="260" height="35" rx="7"/><rect class="barDone" x="398" y="294" width="6" height="35"/><text class="cardText" x="416" y="317">CRUD de clientes</text>
+    <rect class="done" x="398" y="338" width="260" height="35" rx="7"/><rect class="barDone" x="398" y="338" width="6" height="35"/><text class="cardText" x="416" y="361">Búsqueda por nombre o cédula</text>
+    <rect class="done" x="398" y="382" width="260" height="35" rx="7"/><rect class="barDone" x="398" y="382" width="6" height="35"/><text class="cardText" x="416" y="405">Correo válido y cédula única</text>
+
+    <rect class="done" x="684" y="294" width="260" height="35" rx="7"/><rect class="barDone" x="684" y="294" width="6" height="35"/><text class="cardText" x="702" y="317">Modelo ER final de pedidos</text>
+
+    <rect class="done" x="1256" y="294" width="260" height="35" rx="7"/><rect class="barDone" x="1256" y="294" width="6" height="35"/><text class="cardText" x="1274" y="317">Identity y validación antiforgery</text>
+    <rect class="done" x="1256" y="338" width="260" height="35" rx="7"/><rect class="barDone" x="1256" y="338" width="6" height="35"/><text class="cardText" x="1274" y="361">Reintentos y calentamiento Azure SQL</text>
+
+    <rect class="done" x="1542" y="294" width="260" height="35" rx="7"/><rect class="barDone" x="1542" y="294" width="6" height="35"/><text class="cardText" x="1560" y="317">Diagrama ER y normalización</text>
+    <rect class="done" x="1542" y="338" width="260" height="35" rx="7"/><rect class="barDone" x="1542" y="338" width="6" height="35"/><text class="cardText" x="1560" y="361">Story Map y prototipo de vistas</text>
+  </g>
+  <line class="line" x1="112" y1="486" x2="1802" y2="486"/>
+
+  <!-- Hito 2 -->
+  <text class="phase" x="112" y="520">HITO 2 — INTEGRACIÓN DE PEDIDOS Y SEGURIDAD</text>
+  <g>
+    <rect class="plan" x="112" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="112" y="538" width="6" height="35"/><text class="cardText" x="130" y="561">Descontar stock al confirmar</text>
+
+    <rect class="plan" x="684" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="684" y="538" width="6" height="35"/><text class="cardText" x="702" y="561">Crear pedido para un cliente</text>
+    <rect class="plan" x="684" y="582" width="260" height="35" rx="7"/><rect class="barPlan" x="684" y="582" width="6" height="35"/><text class="cardText" x="702" y="605">Agregar productos con autosuggest</text>
+    <rect class="plan" x="684" y="626" width="260" height="35" rx="7"/><rect class="barPlan" x="684" y="626" width="6" height="35"/><text class="cardText" x="702" y="649">Cantidad y descuento por línea</text>
+    <rect class="plan" x="684" y="670" width="260" height="35" rx="7"/><rect class="barPlan" x="684" y="670" width="6" height="35"/><text class="cardText" x="702" y="693">Totales en vivo y confirmación</text>
+
+    <rect class="plan" x="970" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="970" y="538" width="6" height="35"/><text class="cardText" x="988" y="561">GET /api/productos/buscar</text>
+    <rect class="plan" x="970" y="582" width="260" height="35" rx="7"/><rect class="barPlan" x="970" y="582" width="6" height="35"/><text class="cardText" x="988" y="605">POST /api/pedidos/calcular</text>
+
+    <rect class="plan" x="1256" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="538" width="6" height="35"/><text class="cardText" x="1274" y="561">Login y registro</text>
+    <rect class="plan" x="1256" y="582" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="582" width="6" height="35"/><text class="cardText" x="1274" y="605">Roles Admin / Ventas / Operaciones</text>
+    <rect class="plan" x="1256" y="626" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="626" width="6" height="35"/><text class="cardText" x="1274" y="649">Autorización por rol y errores 404/500</text>
+
+    <rect class="plan" x="1542" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="1542" y="538" width="6" height="35"/><text class="cardText" x="1560" y="561">Pruebas funcionales y checklist</text>
+  </g>
+  <line class="line" x1="112" y1="732" x2="1802" y2="732"/>
+
+  <!-- Final -->
+  <text class="phase" x="112" y="766">ENTREGA FINAL Y MEJORAS</text>
+  <g>
+    <rect class="bonus" x="112" y="784" width="260" height="35" rx="7"/><rect class="barBonus" x="112" y="784" width="6" height="35"/><text class="cardText" x="130" y="807">Vista de imagen y miniaturas</text>
+    <rect class="bonus" x="684" y="784" width="260" height="35" rx="7"/><rect class="barBonus" x="684" y="784" width="6" height="35"/><text class="cardText" x="702" y="807">Detalle e historial de pedido</text>
+    <rect class="bonus" x="684" y="828" width="260" height="35" rx="7"/><rect class="barBonus" x="684" y="828" width="6" height="35"/><text class="cardText" x="702" y="851">Exportar a PDF / Excel</text>
+    <rect class="bonus" x="1542" y="784" width="260" height="35" rx="7"/><rect class="barBonus" x="1542" y="784" width="6" height="35"/><text class="cardText" x="1560" y="807">Seeders y README de despliegue</text>
+    <rect class="bonus" x="1542" y="828" width="260" height="35" rx="7"/><rect class="barBonus" x="1542" y="828" width="6" height="35"/><text class="cardText" x="1560" y="851">Informe técnico y demo estable</text>
+  </g>
+  <rect x="112" y="929" width="16" height="16" class="barDone"/><text class="legend" x="140" y="943">Implementado</text>
+  <rect x="300" y="929" width="16" height="16" class="barPlan"/><text class="legend" x="328" y="943">Siguiente hito</text>
+  <rect x="510" y="929" width="16" height="16" class="barBonus"/><text class="legend" x="538" y="943">Entrega final / mejora</text>
+  <text class="subtitle" x="112" y="978">El Story Map prioriza un MVP vertical: datos correctos → pedido calculado → stock actualizado → acceso seguro → evidencia de calidad.</text>
+</svg>

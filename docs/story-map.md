@@ -1,15 +1,62 @@
-# Story map - Hito 1
+# Story Map — Pedidos360
 
-| Actividad | Historia de usuario | Criterio de aceptación |
+## Objetivo del producto
+
+Permitir a una pyme B2B administrar su catálogo e inventario, mantener clientes y crear pedidos con totales auditables, control de stock y seguridad por roles.
+
+## Leyenda
+
+- ✅ **Implementado:** disponible en la aplicación y persistido en Azure SQL.
+- 🟡 **Siguiente hito:** necesario para el MVP final.
+- ⚪ **Mejora:** aporta valor, pero puede priorizarse después del MVP.
+
+## Mapa de historias de usuario
+
+| Actividad del usuario | Explorar | Gestionar | Validar / confirmar | Resultado esperado |
+|---|---|---|---|---|
+| **1. Acceder al sistema** | ⚪ Ver pantalla de inicio | 🟡 Registrarse / iniciar sesión | 🟡 Recuperar sesión y aplicar rol | Cada usuario entra con permisos correctos. |
+| **2. Administrar catálogo** | ✅ Buscar por nombre y filtrar por categoría | ✅ Crear, editar, consultar y eliminar productos | ✅ Validar precio, impuesto, stock, categoría e imagen | Catálogo actualizado y disponible para pedidos. |
+| **3. Administrar imágenes** | ✅ Ver imagen de un producto | ✅ Cargar JPG, PNG o WEBP | ✅ Validar tipo y máximo 2 MB; guardar bytes en Azure SQL | La imagen queda asociada al producto como `varbinary(max)`. |
+| **4. Administrar clientes** | ✅ Buscar por nombre o cédula | ✅ Crear, editar, consultar y eliminar clientes | ✅ Validar correo y cédula única | Clientes confiables para asignar pedidos. |
+| **5. Crear pedido** | 🟡 Seleccionar cliente | 🟡 Buscar productos por nombre/código con AJAX | 🟡 Agregar líneas, cantidades y descuentos | Borrador de pedido con productos correctos. |
+| **6. Calcular y confirmar** | 🟡 Ver subtotal, impuestos, descuentos y total | 🟡 Modificar líneas del pedido | 🟡 Confirmar en una transacción | Pedido almacenado con valores auditables. |
+| **7. Controlar inventario** | 🟡 Consultar stock disponible | 🟡 Disminuir stock al confirmar pedido | 🟡 Bloquear cantidades superiores al stock | Inventario consistente. |
+| **8. Consultar pedidos** | 🟡 Listar por cliente, fecha o estado | 🟡 Abrir detalle | ⚪ Exportar PDF / Excel | Historial comercial consultable. |
+| **9. Seguridad y administración** | 🟡 Ver usuarios y roles | 🟡 Asignar Admin, Ventas u Operaciones | 🟡 Restringir acciones según rol | Acceso controlado a funciones sensibles. |
+| **10. Operación técnica** | ✅ Usar Azure SQL | ✅ Ejecutar migraciones con EF Core | ✅ Reintentos y calentamiento de Azure SQL Serverless | Aplicación estable y esquema reproducible. |
+
+## Corte por hitos
+
+### Hito 1 — Base funcional implementada ✅
+
+| Entrega vertical | Evidencia |
+|---|---|
+| Catálogo de productos | CRUD, categoría, búsqueda, filtro, paginación y validaciones. |
+| Clientes | CRUD, búsqueda, validación de correo y cédula única. |
+| Persistencia | EF Core Code First, migraciones y Azure SQL `Pedidos360DB`. |
+| Imágenes | Carga de JPG/PNG/WEBP, validación y almacenamiento binario. |
+| Resiliencia | Reintentos de Azure SQL y consulta de calentamiento `SELECT 1` al iniciar. |
+
+### Hito 2 — MVP de pedidos 🟡
+
+| Prioridad | Historia de usuario | Criterio de aceptación |
 |---|---|---|
-| Navegar | Como usuario, quiero acceder a módulos claros para ubicarme en el sistema. | El layout muestra Inicio, Productos y Clientes en todas las vistas. |
-| Gestionar productos | Como administrador, quiero crear productos con precio, impuesto, stock, categoría e imagen. | No permite nombre vacío, precio menor o igual a cero, stock negativo, categoría inexistente ni imagen vacía. |
-| Consultar productos | Como usuario, quiero filtrar el catálogo por nombre y categoría. | El listado filtra, conserva criterios y pagina resultados de ocho en ocho. |
-| Mantener productos | Como administrador, quiero editar, ver y eliminar productos. | Las acciones muestran el registro correcto y confirman la eliminación. |
-| Gestionar clientes | Como administrador, quiero registrar clientes con datos de contacto. | Exige nombre, identificación, correo válido, teléfono y dirección. |
-| Consultar clientes | Como usuario, quiero buscar clientes por nombre o identificación. | La búsqueda devuelve coincidencias y pagina resultados. |
-| Mantener clientes | Como administrador, quiero editar, ver y eliminar clientes. | No permite identificaciones duplicadas y muestra mensajes de éxito. |
+| Alta | Como **Ventas**, quiero seleccionar un cliente para iniciar un pedido. | No se puede confirmar un pedido sin cliente válido. |
+| Alta | Como **Ventas**, quiero buscar y agregar productos con AJAX. | Solo se muestran productos activos; la búsqueda responde sin recargar la página. |
+| Alta | Como **Ventas**, quiero indicar cantidad y descuento por línea. | Cantidad mayor a 0 y no superior al stock disponible. |
+| Alta | Como **Ventas**, quiero ver subtotal, impuestos y total en tiempo real. | Los cálculos coinciden con los valores almacenados al confirmar. |
+| Alta | Como **Operaciones**, quiero que el stock disminuya al confirmar. | Pedido y movimiento de inventario se guardan juntos o ninguno se guarda. |
+| Media | Como **usuario**, quiero ver el detalle e historial de pedidos. | Se puede consultar cada línea, estado, usuario y total. |
 
-## Alcance posterior
+### Hito 3 — Seguridad y mejoras ⚪
 
-Pedidos, descuentos, stock transaccional, roles, API y AJAX se implementarán en el Hito 2.
+| Prioridad | Historia de usuario | Criterio de aceptación |
+|---|---|---|
+| Alta | Como **Admin**, quiero asignar roles a usuarios. | Admin, Ventas y Operaciones ven únicamente sus acciones autorizadas. |
+| Media | Como **usuario**, quiero manejar errores amigables. | Fallos de datos o red muestran un mensaje recuperable, sin exponer detalles técnicos. |
+| Media | Como **Ventas**, quiero exportar un pedido. | Se genera un PDF o Excel con encabezado, líneas y totales. |
+| Baja | Como **líder**, quiero indicadores del negocio. | Panel con pedidos, ventas, stock bajo y clientes activos. |
+
+## Relación con el modelo de datos final
+
+El Hito 2 incorpora `Pedidos` y `PedidoDetalles`. Cada pedido pertenece a un `Cliente` y a un usuario de `AspNetUsers`; cada línea referencia un `Producto`. La confirmación debe ejecutarse en una transacción para persistir el pedido, sus detalles y la disminución de stock de forma consistente.
