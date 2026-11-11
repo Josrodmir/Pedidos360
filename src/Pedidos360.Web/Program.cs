@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Filters;
@@ -8,6 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+try
+{
+    var sqlConnection = new SqlConnectionStringBuilder(connectionString);
+    if (string.IsNullOrWhiteSpace(sqlConnection.DataSource) || string.IsNullOrWhiteSpace(sqlConnection.InitialCatalog))
+        throw new ArgumentException("The SQL server and database name are required.");
+}
+catch (ArgumentException exception)
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings__DefaultConnection must be a valid SQL Server connection string. Configure it only as a backend secret (Render Environment or User Secrets).",
+        exception);
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
         sqlOptions.EnableRetryOnFailure(
