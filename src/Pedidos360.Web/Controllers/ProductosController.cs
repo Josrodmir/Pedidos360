@@ -8,16 +8,21 @@ using Pedidos360.Web.Security;
 
 namespace Pedidos360.Web.Controllers;
 
-[Authorize(Roles = AppRoles.CatalogoLectura)]
 public class ProductosController(ApplicationDbContext context) : Controller
 {
     private const int PageSize = 8;
     private const long MaxImageSizeBytes = 2 * 1024 * 1024;
     private static readonly HashSet<string> AllowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(string? busqueda, int? categoriaId, int pagina = 1)
     {
         var query = context.Productos.Include(p => p.Categoria).AsNoTracking().AsQueryable();
+
+        if (!User.IsInRole(AppRoles.Administrador) && !User.IsInRole(AppRoles.Inventario))
+        {
+            query = query.Where(p => p.Activo);
+        }
 
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
@@ -126,6 +131,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Details(int? id)
     {
         if (id is null) return NotFound();
@@ -134,6 +140,7 @@ public class ProductosController(ApplicationDbContext context) : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Imagen(int id)
     {
         var imagen = await context.Productos.AsNoTracking()

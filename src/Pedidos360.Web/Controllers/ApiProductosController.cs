@@ -6,13 +6,14 @@ using Pedidos360.Web.Security;
 
 namespace Pedidos360.Web.Controllers;
 
-[ApiController, Route("api/productos"), Authorize(Roles = AppRoles.CatalogoLectura)]
+[ApiController, Route("api/productos")]
 public class ApiProductosController(ApplicationDbContext context) : ControllerBase
 {
+    [AllowAnonymous]
     [HttpGet("filtrar")]
     public async Task<IActionResult> Filtrar(string? q, int? categoriaId)
     {
-        var query = context.Productos.Include(p => p.Categoria).AsNoTracking().AsQueryable();
+        var query = context.Productos.Include(p => p.Categoria).AsNoTracking().Where(p => p.Activo).AsQueryable();
         if (!string.IsNullOrWhiteSpace(q)) query = query.Where(p => p.Nombre.Contains(q));
         if (categoriaId.HasValue) query = query.Where(p => p.CategoriaId == categoriaId.Value);
 
@@ -28,6 +29,7 @@ public class ApiProductosController(ApplicationDbContext context) : ControllerBa
         }).ToListAsync());
     }
 
+    [AllowAnonymous]
     [HttpGet("buscar")]
     public async Task<IActionResult> Buscar(string? q) => Ok(await context.Productos.AsNoTracking()
         .Where(p => p.Activo && p.Stock > 0 && (string.IsNullOrWhiteSpace(q) || p.Nombre.Contains(q)))
