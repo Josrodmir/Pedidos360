@@ -76,11 +76,14 @@
         });
 
         if (!response.ok) {
-            totals.textContent = "No se pudieron calcular los totales. Revise las cantidades.";
+            const message = await response.text();
+            totals.textContent = message || "No se pudieron calcular los totales. Revise las cantidades.";
+            totals.classList.add("text-danger");
             return;
         }
 
         const data = await response.json();
+        totals.classList.remove("text-danger");
         totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
     }
 })();

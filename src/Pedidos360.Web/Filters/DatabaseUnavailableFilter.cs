@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Storage;
+using MySql.Data.MySqlClient;
 
 namespace Pedidos360.Web.Filters;
 
@@ -30,5 +31,6 @@ public sealed class DatabaseUnavailableFilter : IAsyncExceptionFilter
     private static bool IsDatabaseUnavailable(Exception exception) =>
         exception is RetryLimitExceededException ||
         exception is SqlException { Number: 40613 or 40925 or -2 } ||
+        exception is MySqlException ||
         exception.InnerException is not null && IsDatabaseUnavailable(exception.InnerException);
 }
