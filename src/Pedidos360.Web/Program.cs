@@ -10,13 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var databaseProvider = builder.Configuration["Database:Provider"]?.Trim().ToLowerInvariant() ?? "sqlserver";
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var aivenSchema = builder.Configuration["Database:AivenSchema"]?.Trim();
 
 if (databaseProvider is "mysql" or "aiven")
 {
     var connectionUri = builder.Configuration["Database:ConnectionUri"];
     if (!string.IsNullOrWhiteSpace(connectionUri))
     {
-        connectionString = BuildMySqlConnectionString(connectionUri);
+        connectionString = BuildMySqlConnectionString(connectionUri, aivenSchema);
     }
 }
 
@@ -84,7 +85,7 @@ app.MapRazorPages()
 
 app.Run();
 
-static string BuildMySqlConnectionString(string connectionUri)
+static string BuildMySqlConnectionString(string connectionUri, string? schemaOverride)
 {
     if (!Uri.TryCreate(connectionUri, UriKind.Absolute, out var uri)
         || !uri.Scheme.Equals("mysql", StringComparison.OrdinalIgnoreCase)
@@ -101,11 +102,15 @@ static string BuildMySqlConnectionString(string connectionUri)
         throw new InvalidOperationException("Database__ConnectionUri must include a user and password.");
     }
 
+    var databaseName = string.IsNullOrWhiteSpace(schemaOverride)
+        ? uri.AbsolutePath.Trim('/')
+        : schemaOverride;
+
     var connection = new MySqlConnectionStringBuilder
     {
         Server = uri.Host,
         Port = uri.IsDefaultPort ? 3306u : (uint)uri.Port,
-        Database = uri.AbsolutePath.Trim('/'),
+        Database = databaseName,
         UserID = Uri.UnescapeDataString(credentials[0]),
         Password = Uri.UnescapeDataString(credentials[1]),
         SslMode = MySqlSslMode.Required
