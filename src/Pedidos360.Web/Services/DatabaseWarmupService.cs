@@ -29,6 +29,7 @@ public sealed class DatabaseWarmupService(
                     await context.Database.EnsureCreatedAsync(stoppingToken);
                 await context.Database.ExecuteSqlRawAsync("SELECT 1", stoppingToken);
                 await SeedCatalogoAsync(context, stoppingToken);
+                await SeedPedidoDemostracionAsync(context, stoppingToken);
             });
 
             logger.LogInformation("Database is available after application warm-up.");
@@ -145,4 +146,62 @@ public sealed class DatabaseWarmupService(
         string Correo,
         string Telefono,
         string Direccion);
+
+    private static async Task SeedPedidoDemostracionAsync(
+        ApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        // A single confirmed order lets the team demonstrate details, totals and stock reduction.
+        // It is deliberately idempotent: business orders created during the demo are never replaced.
+        if (await context.Pedidos.AnyAsync(cancellationToken))
+            return;
+
+        var cliente = await context.Clientes
+            .FirstOrDefaultAsync(c => c.Cedula == "3-101-456789", cancellationToken);
+        var productos = await context.Productos
+            .Where(p => p.Nombre == "Teclado inalámbrico" || p.Nombre == "Resma papel carta")
+            .ToDictionaryAsync(p => p.Nombre, cancellationToken);
+
+        if (cliente is null
+            || !productos.TryGetValue("Teclado inalámbrico", out var teclado)
+            || !productos.TryGetValue("Resma papel carta", out var resma)
+            || teclado.Stock < 2
+            || resma.Stock < 10)
+            return;
+
+        var pedido = new Pedido
+        {
+            ClienteId = cliente.Id,
+            UsuarioId = await context.Users
+                .Where(u => u.Email == "admin@pedidos360.demo")
+                .Select(u => u.Id)
+                .FirstOrDefaultAsync(cancellationToken),
+            Fecha = DateTime.UtcNow,
+            Estado = "Confirmado"
+        };
+
+        AgregarLinea(pedido, teclado, 2);
+        AgregarLinea(pedido, resma, 10);
+        pedido.Subtotal = pedido.Detalles.Sum(d => d.PrecioUnitario * d.Cantidad * (1 - d.Descuento / 100));
+        pedido.Impuestos = pedido.Detalles.Sum(d => d.PrecioUnitario * d.Cantidad * (1 - d.Descuento / 100) * d.ImpuestoPorc / 100);
+        pedido.Total = pedido.Subtotal + pedido.Impuestos;
+
+        context.Pedidos.Add(pedido);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void AgregarLinea(Pedido pedido, Producto producto, int cantidad)
+    {
+        var baseLinea = producto.Precio * cantidad;
+        producto.Stock -= cantidad;
+        pedido.Detalles.Add(new PedidoDetalle
+        {
+            ProductoId = producto.Id,
+            Cantidad = cantidad,
+            PrecioUnitario = producto.Precio,
+            Descuento = 0,
+            ImpuestoPorc = producto.ImpuestoPorc,
+            TotalLinea = baseLinea + baseLinea * producto.ImpuestoPorc / 100
+        });
+    }
 }
