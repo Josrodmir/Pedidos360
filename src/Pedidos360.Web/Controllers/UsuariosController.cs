@@ -10,16 +10,30 @@ namespace Pedidos360.Web.Controllers;
 [Authorize(Roles = AppRoles.Administrador)]
 public class UsuariosController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager) : Controller
 {
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? busqueda, string? rol)
     {
-        var usuarios = await userManager.Users.OrderBy(u => u.Email).ToListAsync();
+        var query = userManager.Users.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var termino = busqueda.Trim();
+            query = query.Where(u =>
+                (u.Email != null && u.Email.Contains(termino)) ||
+                (u.UserName != null && u.UserName.Contains(termino)));
+        }
+
+        var usuarios = await query.OrderBy(u => u.Email).ToListAsync();
         var modelo = new List<UsuarioRolViewModel>();
         foreach (var usuario in usuarios)
         {
-            var rol = (await userManager.GetRolesAsync(usuario)).SingleOrDefault() ?? "Sin asignar";
-            modelo.Add(new UsuarioRolViewModel { UsuarioId = usuario.Id, Correo = usuario.Email ?? usuario.UserName ?? "Sin correo", RolActual = rol });
+            var rolActual = (await userManager.GetRolesAsync(usuario)).SingleOrDefault() ?? "Sin asignar";
+            modelo.Add(new UsuarioRolViewModel { UsuarioId = usuario.Id, Correo = usuario.Email ?? usuario.UserName ?? "Sin correo", RolActual = rolActual });
         }
+        if (!string.IsNullOrWhiteSpace(rol))
+            modelo = modelo.Where(u => u.RolActual == rol).ToList();
+
         ViewBag.Roles = AppRoles.Lista;
+        ViewBag.Busqueda = busqueda;
+        ViewBag.RolSeleccionado = rol;
         return View(modelo);
     }
 

@@ -12,7 +12,23 @@ namespace Pedidos360.Web.Controllers;
 public class PedidosController(ApplicationDbContext context) : Controller
 {
     [Authorize(Roles = AppRoles.PedidosLectura)]
-    public async Task<IActionResult> Index() => View(await context.Pedidos.Include(p => p.Cliente).AsNoTracking().OrderByDescending(p => p.Fecha).ToListAsync());
+    public async Task<IActionResult> Index(string? busqueda)
+    {
+        var query = context.Pedidos.Include(p => p.Cliente).AsNoTracking().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var termino = busqueda.Trim();
+            var idTexto = termino.Replace("#P-", string.Empty, StringComparison.OrdinalIgnoreCase);
+            var esId = int.TryParse(idTexto, out var pedidoId);
+            query = query.Where(p =>
+                p.Cliente!.Nombre.Contains(termino) ||
+                p.Estado.Contains(termino) ||
+                (esId && p.Id == pedidoId));
+        }
+
+        ViewBag.Busqueda = busqueda;
+        return View(await query.OrderByDescending(p => p.Fecha).ToListAsync());
+    }
     [Authorize(Roles = AppRoles.PedidosGestion)]
     public async Task<IActionResult> Create() { await Clientes(); return View(); }
     [Authorize(Roles = AppRoles.PedidosGestion)]
