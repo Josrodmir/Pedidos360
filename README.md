@@ -36,7 +36,9 @@ El repositorio incluye un `Dockerfile` para desplegar como **Web Service / Docke
 
 ASP.NET Identity almacena las contraseñas como hashes, nunca como texto plano. Los perfiles de acceso son: **Administrador**, **Ventas**, **Contabilidad** e **Inventario**. Administración puede asignarlos desde `Usuarios`; Inventario gestiona catálogo, Ventas gestiona clientes y pedidos, y Contabilidad consulta pedidos.
 
-Al crear el primer usuario, asígnele el rol `Administrador` desde Azure SQL una sola vez; luego ese usuario administrará los demás perfiles desde la pantalla `Usuarios`. Los usuarios se crean mediante Identity y sus contraseñas se almacenan únicamente como hashes en la base de datos; no se incluyen usuarios ni contraseñas predeterminadas en el código fuente.
+Al crear el primer usuario, asígnele el rol `Administrador` desde Azure SQL una sola vez; luego ese usuario administrará los demás perfiles desde la pantalla `Usuarios`. Los usuarios se crean mediante Identity y sus contraseñas se almacenan únicamente como hashes en la base de datos.
+
+Para una demostración controlada se pueden aprovisionar cuatro cuentas iniciales sin exponerlas en el repositorio. En Render se habilita `DemoAccounts__SeedEnabled=true` y se definen, para cada rol, `DemoAccounts__<Rol>__Email` y `DemoAccounts__<Rol>__Password`. Por ejemplo: `DemoAccounts__Administrador__Email`. Al arrancar, la aplicación crea solo las cuentas configuradas, las confirma y asigna el rol correspondiente. Las contraseñas permanecen exclusivamente como secretos de Render y sus hashes en Azure SQL.
 
 ## Documentación del avance
 
