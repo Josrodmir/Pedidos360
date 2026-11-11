@@ -6,7 +6,7 @@
     <a asp-action="Create" class="btn btn-primary">+ Nuevo producto</a>
 </div>
 
-<form method="get" class="card card-body border-0 shadow-sm mb-4">
+<form method="get" id="filtrosProductos" data-api-url="/api/productos/filtrar" data-puede-gestionar="@User.IsInRole("Administrador") || @User.IsInRole("Inventario")" data-puede-eliminar="@User.IsInRole("Administrador")" class="card card-body border-0 shadow-sm mb-4">
     <div class="row g-2 align-items-end">
         <div class="col-md-5"><label class="form-label" for="busqueda">Nombre</label><input name="busqueda" id="busqueda" value="@Model.Busqueda" class="form-control" placeholder="Buscar producto" /></div>
         <div class="col-md-4"><label class="form-label" for="categoriaId">Categoría</label><select name="categoriaId" id="categoriaId" class="form-select"><option value="">Todas las categorías</option>@foreach (var categoria in Model.Categorias) { <option value="@categoria.Id" selected="@(Model.CategoriaId == categoria.Id)">@categoria.Nombre</option> }</select></div>
@@ -16,15 +16,60 @@
 
 @if (Model.Productos.Count == 0)
 {
-    <div class="text-center p-5 bg-light rounded-3"><h2 class="h5">No hay productos para mostrar</h2><p class="text-secondary">Crea el primero o cambia los filtros.</p></div>
+    <div id="sinResultados" class="text-center p-5 bg-light rounded-3"><h2 class="h5">No hay productos para mostrar</h2><p class="text-secondary">Crea el primero o cambia los filtros.</p></div>
 }
 else
 {
-    <div class="table-responsive shadow-sm rounded-3"><table class="table table-hover align-middle mb-0 bg-white"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Impuesto</th><th>Stock</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody>
+    <div id="sinResultados" class="text-center p-5 bg-light rounded-3 d-none"><h2 class="h5">No hay productos para mostrar</h2><p class="text-secondary">Cambia los filtros o crea un producto.</p></div>
+    <div class="table-responsive shadow-sm rounded-3"><table class="table table-hover align-middle mb-0 bg-white"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Impuesto</th><th>Stock</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="resultadosProductos">
     @foreach (var producto in Model.Productos) { <tr><td class="fw-semibold">@producto.Nombre</td><td>@producto.Categoria?.Nombre</td><td>₡@producto.Precio.ToString("N2")</td><td>@producto.ImpuestoPorc%</td><td>@producto.Stock</td><td><span class="badge @(producto.Activo ? "text-bg-success" : "text-bg-secondary")">@(producto.Activo ? "Activo" : "Inactivo")</span></td><td class="text-end"><a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-secondary">Ver</a> <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-primary">Editar</a> <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-danger">Eliminar</a></td></tr> }
     </tbody></table></div>
     @if (Model.TotalPaginas > 1)
     {
         <nav class="mt-4"><ul class="pagination justify-content-center">@for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++) { <li class="page-item @(pagina == Model.PaginaActual ? "active" : "")"><a class="page-link" asp-route-pagina="@pagina" asp-route-busqueda="@Model.Busqueda" asp-route-categoriaId="@Model.CategoriaId">@pagina</a></li> }</ul></nav>
     }
+}
+
+<div id="errorFiltros" class="alert alert-danger d-none mt-3" role="alert"></div>
+
+@section Scripts {
+<script>
+(() => {
+    const form = document.getElementById('filtrosProductos');
+    const body = document.getElementById('resultadosProductos');
+    const empty = document.getElementById('sinResultados');
+    const error = document.getElementById('errorFiltros');
+    if (!form || !body) return;
+    const search = document.getElementById('busqueda');
+    const category = document.getElementById('categoriaId');
+    const manage = form.dataset.puedeGestionar === 'True';
+    const remove = form.dataset.puedeEliminar === 'True';
+    let timer;
+
+    const money = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' });
+    const button = (text, href, style) => { const a = document.createElement('a'); a.textContent = text; a.href = href; a.className = `btn btn-sm ${style}`; return a; };
+    function row(producto) {
+        const tr = document.createElement('tr');
+        const add = (value, className = '') => { const td = document.createElement('td'); td.textContent = value; td.className = className; tr.append(td); };
+        add(producto.nombre, 'fw-semibold'); add(producto.categoria); add(money.format(producto.precio)); add(`${producto.impuestoPorc}%`); add(producto.stock);
+        const state = document.createElement('td'); const badge = document.createElement('span'); badge.textContent = producto.activo ? 'Activo' : 'Inactivo'; badge.className = `badge ${producto.activo ? 'text-bg-success' : 'text-bg-secondary'}`; state.append(badge); tr.append(state);
+        const actions = document.createElement('td'); actions.className = 'text-end'; actions.append(button('Ver', `/Productos/Details/${producto.id}`, 'btn-outline-secondary'));
+        if (manage) { actions.append(' ', button('Editar', `/Productos/Edit/${producto.id}`, 'btn-outline-primary')); }
+        if (remove) { actions.append(' ', button('Eliminar', `/Productos/Delete/${producto.id}`, 'btn-outline-danger')); }
+        tr.append(actions); return tr;
+    }
+    async function filter() {
+        error.classList.add('d-none');
+        const params = new URLSearchParams(); if (search.value.trim()) params.set('q', search.value.trim()); if (category.value) params.set('categoriaId', category.value);
+        try {
+            const response = await fetch(`${form.dataset.apiUrl}?${params}`);
+            if (!response.ok) throw new Error('No fue posible actualizar el catálogo. Intente nuevamente.');
+            const products = await response.json(); body.replaceChildren(...products.map(row)); empty.classList.toggle('d-none', products.length !== 0);
+        } catch (e) { error.textContent = e.message; error.classList.remove('d-none'); }
+    }
+    form.addEventListener('submit', e => { e.preventDefault(); filter(); });
+    search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filter, 300); });
+    category.addEventListener('change', filter);
+})();
+</script>
 }

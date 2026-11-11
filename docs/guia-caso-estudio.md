@@ -2,7 +2,7 @@
 
 ## Objetivo de la demostración
 
-Mostrar que Pedidos360 resuelve el primer corte vertical de una aplicación B2B: administra catálogo y clientes, conserva los datos en SQL Server/Azure SQL y protege la calidad de los datos mediante validaciones.
+Mostrar que Pedidos360 resuelve un flujo B2B completo: catálogo, clientes, pedidos, inventario, roles y persistencia en Azure SQL con validaciones y llamadas AJAX.
 
 ## Antes de iniciar
 
@@ -17,11 +17,12 @@ Mostrar que Pedidos360 resuelve el primer corte vertical de una aplicación B2B:
 ## Recorrido recomendado (5–7 minutos)
 
 1. **Contexto (30 s):** presentar el problema: una pyme B2B necesita controlar catálogo, clientes e inventario antes de registrar pedidos.
-2. **Modelo de datos (45 s):** abrir `docs/diagrama-entidad-relacion-final.svg`. Explicar las entidades Categoría, Producto y Cliente; destacar que un producto pertenece a una categoría y que la cédula de cliente es única.
-3. **Productos (2 min):** crear un producto con categoría, precio, impuesto, stock e imagen. Mostrar la validación si se intenta una imagen de formato no permitido o superior a 2 MB. Buscarlo, filtrar por categoría y abrir su detalle.
-4. **Clientes (1–2 min):** crear un cliente y mostrar las validaciones de correo y cédula. Probar una cédula repetida para explicar la restricción de unicidad.
-5. **Persistencia y resiliencia (1 min):** señalar las migraciones de Entity Framework y la conexión a Azure SQL. Explicar que la aplicación usa reintentos y una consulta de calentamiento para Azure SQL Serverless.
-6. **Cierre (30 s):** mostrar el Story Map y ubicar el estado actual: Hito 1 terminado; pedidos, disminución transaccional de stock y roles están planificados para el Hito 2.
+2. **Modelo de datos (45 s):** abrir `docs/diagrama-entidad-relacion-final.svg`. Explicar Categoría, Producto, Cliente, Pedido, PedidoDetalle e Identity.
+3. **Catálogo y AJAX (1 min):** filtrar por texto y categoría; el resultado cambia sin recargar. Explicar que `ApiProductosController` atiende la solicitud.
+4. **Clientes (1 min):** crear un cliente y demostrar las validaciones de correo, cédula única y datos obligatorios.
+5. **Pedido y errores de negocio (2 min):** buscar productos con AJAX, agregar líneas y mostrar los totales en vivo. Intentar exceder el stock: la aplicación rechaza el pedido y muestra el mensaje sin modificar el inventario.
+6. **Seguridad y persistencia (1 min):** mostrar los roles Administrador, Ventas, Inventario y Contabilidad; explicar que las contraseñas se almacenan como hashes. Señalar migraciones, Azure SQL, reintentos y calentamiento serverless.
+7. **Cierre (30 s):** mostrar Story Map y relacionar cada requisito solicitado con la función terminada.
 
 ## Preguntas frecuentes y respuestas breves
 
@@ -31,14 +32,16 @@ Mostrar que Pedidos360 resuelve el primer corte vertical de una aplicación B2B:
 | ¿Dónde se guardan las imágenes? | En la tabla de productos como bytes (`varbinary(max)`), con su tipo MIME; no se depende de una ruta local. |
 | ¿Cómo se evita información incorrecta? | Con anotaciones y validación de servidor, además de restricciones en base de datos: categorías válidas y cédula única. |
 | ¿Qué ocurre si Azure SQL tarda en responder? | EF Core reintenta fallos transitorios, aumenta el tiempo de espera y un servicio realiza calentamiento al iniciar. |
-| ¿Qué falta para el MVP? | Crear y confirmar pedidos, sus detalles, cálculo de totales, actualización transaccional de stock y autorización por roles. |
+| ¿Cómo se protegen las cuentas? | ASP.NET Identity guarda hashes de contraseñas y relaciona cada usuario con un rol en `AspNetUserRoles`. |
 
 ## Evidencias a mostrar
 
 - `docs/story-map.md`: alcance, historias y criterios de aceptación.
 - `docs/diagrama-entidad-relacion-final.svg`: modelo de datos.
 - `Data/Migrations/`: evolución reproducible del esquema.
-- CRUD de Productos y Clientes en ejecución.
+- CRUD de Productos y Clientes, filtros AJAX y creación de pedidos en ejecución.
+- `ApiProductosController` y `ApiPedidosController` como evidencia de Web API.
+- Pantalla **Usuarios** como evidencia de autorización por roles.
 - Imagen cargada desde la base de datos en el detalle del producto.
 
 ## Lista de verificación final
@@ -47,5 +50,7 @@ Mostrar que Pedidos360 resuelve el primer corte vertical de una aplicación B2B:
 - [ ] Las migraciones están aplicadas.
 - [ ] Hay al menos una categoría y un producto para mostrar filtros y búsqueda.
 - [ ] Hay un cliente de ejemplo para mostrar el CRUD.
-- [ ] La presentación técnica y esta guía están abiertas antes de iniciar.
+- [ ] Se creó un pedido de prueba y hay suficiente stock para una prueba válida.
+- [ ] Se probó un pedido que excede el stock para mostrar el error de negocio.
+- [ ] La presentación técnica, el ERD, Story Map y esta guía están abiertos antes de iniciar.
 - [ ] No se muestran secretos, contraseñas ni datos personales reales.

@@ -61,7 +61,7 @@
     <rect class="plan" x="970" y="582" width="260" height="35" rx="7"/><rect class="barPlan" x="970" y="582" width="6" height="35"/><text class="cardText" x="988" y="605">POST /api/pedidos/calcular</text>
 
     <rect class="plan" x="1256" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="538" width="6" height="35"/><text class="cardText" x="1274" y="561">Login y registro</text>
-    <rect class="plan" x="1256" y="582" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="582" width="6" height="35"/><text class="cardText" x="1274" y="605">Roles Admin / Ventas / Operaciones</text>
+    <rect class="done" x="1256" y="582" width="260" height="35" rx="7"/><rect class="barDone" x="1256" y="582" width="6" height="35"/><text class="cardText" x="1274" y="605">Roles y autorización implementados</text>
     <rect class="plan" x="1256" y="626" width="260" height="35" rx="7"/><rect class="barPlan" x="1256" y="626" width="6" height="35"/><text class="cardText" x="1274" y="649">Autorización por rol y errores 404/500</text>
 
     <rect class="plan" x="1542" y="538" width="260" height="35" rx="7"/><rect class="barPlan" x="1542" y="538" width="6" height="35"/><text class="cardText" x="1560" y="561">Pruebas funcionales y checklist</text>
