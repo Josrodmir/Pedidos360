@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 using Pedidos360.Web.Data;
 using Pedidos360.Web.Filters;
 using Pedidos360.Web.Services;
@@ -8,27 +8,39 @@ using Pedidos360.Web.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-try
+var databaseProvider = builder.Configuration["Database:Provider"]?.Trim().ToLowerInvariant() ?? "sqlserver";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (databaseProvider is "mysql" or "aiven")
 {
-    var sqlConnection = new SqlConnectionStringBuilder(connectionString);
-    if (string.IsNullOrWhiteSpace(sqlConnection.DataSource) || string.IsNullOrWhiteSpace(sqlConnection.InitialCatalog))
-        throw new ArgumentException("The SQL server and database name are required.");
+    var connectionUri = builder.Configuration["Database:ConnectionUri"];
+    if (!string.IsNullOrWhiteSpace(connectionUri))
+    {
+        connectionString = BuildMySqlConnectionString(connectionUri);
+    }
 }
-catch (ArgumentException exception)
+
+if (string.IsNullOrWhiteSpace(connectionString))
 {
     throw new InvalidOperationException(
-        "ConnectionStrings__DefaultConnection must be a valid SQL Server connection string. Configure it only as a backend secret (Render Environment or User Secrets).",
-        exception);
+        "Configure ConnectionStrings__DefaultConnection or, for Aiven MySQL, Database__ConnectionUri as a backend secret.");
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (databaseProvider is "mysql" or "aiven")
+    {
+        options.UseMySQL(connectionString);
+        return;
+    }
+
     options.UseSqlServer(connectionString, sqlOptions =>
         sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 10,
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null)
-        .CommandTimeout(90)));
+        .CommandTimeout(90));
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -71,3 +83,33 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+static string BuildMySqlConnectionString(string connectionUri)
+{
+    if (!Uri.TryCreate(connectionUri, UriKind.Absolute, out var uri)
+        || !uri.Scheme.Equals("mysql", StringComparison.OrdinalIgnoreCase)
+        || string.IsNullOrWhiteSpace(uri.Host)
+        || string.IsNullOrWhiteSpace(uri.UserInfo)
+        || string.IsNullOrWhiteSpace(uri.AbsolutePath.Trim('/')))
+    {
+        throw new InvalidOperationException("Database__ConnectionUri must be a valid mysql:// URI.");
+    }
+
+    var credentials = uri.UserInfo.Split(':', 2);
+    if (credentials.Length != 2)
+    {
+        throw new InvalidOperationException("Database__ConnectionUri must include a user and password.");
+    }
+
+    var connection = new MySqlConnectionStringBuilder
+    {
+        Server = uri.Host,
+        Port = uri.IsDefaultPort ? 3306u : (uint)uri.Port,
+        Database = uri.AbsolutePath.Trim('/'),
+        UserID = Uri.UnescapeDataString(credentials[0]),
+        Password = Uri.UnescapeDataString(credentials[1]),
+        SslMode = MySqlSslMode.Required
+    };
+
+    return connection.ConnectionString;
+}

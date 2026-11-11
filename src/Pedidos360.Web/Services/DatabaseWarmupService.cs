@@ -4,9 +4,8 @@ using Pedidos360.Web.Data;
 namespace Pedidos360.Web.Services;
 
 /// <summary>
-/// Requests Azure SQL to resume as soon as the web application starts.
-/// Azure SQL Serverless can pause after inactivity; this lightweight query
-/// avoids making the first business page responsible for waking the database.
+/// Initializes a newly configured relational database and verifies connectivity
+/// without making the first business page responsible for this work.
 /// </summary>
 public sealed class DatabaseWarmupService(
     IServiceScopeFactory scopeFactory,
@@ -22,10 +21,14 @@ public sealed class DatabaseWarmupService(
 
             await strategy.ExecuteAsync(async () =>
             {
+                // Aiven uses a clean MySQL database. EnsureCreated avoids applying
+                // SQL Server-specific historical migrations to that provider.
+                if (context.Database.ProviderName?.Contains("MySql", StringComparison.OrdinalIgnoreCase) == true)
+                    await context.Database.EnsureCreatedAsync(stoppingToken);
                 await context.Database.ExecuteSqlRawAsync("SELECT 1", stoppingToken);
             });
 
-            logger.LogInformation("Azure SQL is available after application warm-up.");
+            logger.LogInformation("Database is available after application warm-up.");
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
@@ -34,7 +37,7 @@ public sealed class DatabaseWarmupService(
         catch (Exception exception)
         {
             logger.LogWarning(exception,
-                "Azure SQL is still resuming. Request retries will continue using the configured strategy.");
+                "The database is not ready yet. Request retries will continue using the configured strategy.");
         }
     }
 }

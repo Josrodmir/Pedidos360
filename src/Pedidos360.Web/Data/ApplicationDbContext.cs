@@ -16,6 +16,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(builder);
 
+        // SQL Server uses varbinary(max); Aiven MySQL requires a LONGBLOB column.
+        // Fluent configuration overrides the data annotation in Producto.
+        var imageColumnType = Database.ProviderName?.Contains("MySql", StringComparison.OrdinalIgnoreCase) == true
+            ? "longblob"
+            : "varbinary(max)";
+        builder.Entity<Producto>().Property(p => p.ImagenBytes).HasColumnType(imageColumnType);
+
         builder.Entity<Categoria>().HasIndex(c => c.Nombre).IsUnique();
         builder.Entity<Cliente>().HasIndex(c => c.Cedula).IsUnique();
         builder.Entity<Producto>()
