@@ -67,13 +67,26 @@ public sealed class DatabaseWarmupService(
 
         foreach (var demo in productos)
         {
-            if (await context.Productos.AnyAsync(p => p.Nombre == demo.Nombre, cancellationToken))
-                continue;
-
             var rutaImagen = Path.Combine(environment.WebRootPath, "images", "catalogo", demo.ArchivoImagen);
             if (!File.Exists(rutaImagen))
             {
                 logger.LogWarning("The catalog image {ImagePath} was not found; product {ProductName} was skipped.", rutaImagen, demo.Nombre);
+                continue;
+            }
+
+            var productoExistente = await context.Productos
+                .FirstOrDefaultAsync(p => p.Nombre == demo.Nombre, cancellationToken);
+
+            if (productoExistente is not null)
+            {
+                // Preserves stock and price already changed during a demonstration,
+                // while repairing legacy data that did not yet contain a binary image.
+                if (productoExistente.ImagenBytes is null or { Length: 0 })
+                {
+                    productoExistente.ImagenBytes = await File.ReadAllBytesAsync(rutaImagen, cancellationToken);
+                    productoExistente.ImagenTipo = "image/png";
+                    productoExistente.ImagenUrlLegado = null;
+                }
                 continue;
             }
 
@@ -87,6 +100,27 @@ public sealed class DatabaseWarmupService(
                 Activo = true,
                 ImagenBytes = await File.ReadAllBytesAsync(rutaImagen, cancellationToken),
                 ImagenTipo = "image/png"
+            });
+        }
+
+        var clientes = new[]
+        {
+            new ClienteDemo("Distribuidora Central S.A.", "3-101-456789", "ventas@central.cr", "2222-1000", "San José"),
+            new ClienteDemo("Comercial La Bodega", "3-101-987654", "compras@labodega.cr", "2233-2000", "Heredia")
+        };
+
+        foreach (var demo in clientes)
+        {
+            if (await context.Clientes.AnyAsync(c => c.Cedula == demo.Cedula, cancellationToken))
+                continue;
+
+            context.Clientes.Add(new Cliente
+            {
+                Nombre = demo.Nombre,
+                Cedula = demo.Cedula,
+                Correo = demo.Correo,
+                Telefono = demo.Telefono,
+                Direccion = demo.Direccion
             });
         }
 
@@ -104,4 +138,11 @@ public sealed class DatabaseWarmupService(
         decimal ImpuestoPorc,
         int Stock,
         string ArchivoImagen);
+
+    private sealed record ClienteDemo(
+        string Nombre,
+        string Cedula,
+        string Correo,
+        string Telefono,
+        string Direccion);
 }
