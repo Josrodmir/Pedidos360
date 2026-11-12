@@ -17,12 +17,16 @@ public class ApiPedidosController(ApplicationDbContext context) : ControllerBase
         if (lineas.Any(l => l.Cantidad <= 0 || l.Descuento is < 0 or > 100))
             return BadRequest("Revise las cantidades y descuentos ingresados.");
 
-        var productos = await context.Productos.Where(p => lineas.Select(l => l.ProductoId).Contains(p.Id)).ToDictionaryAsync(p => p.Id);
-        if (productos.Count != lineas.Select(l => l.ProductoId).Distinct().Count()) return BadRequest("Uno o más productos no existen.");
+        var cantidadesPorProducto = lineas
+            .GroupBy(l => l.ProductoId)
+            .ToDictionary(g => g.Key, g => g.Sum(l => l.Cantidad));
+        var productoIds = cantidadesPorProducto.Keys.ToList();
+        var productos = await context.Productos.Where(p => productoIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
+        if (productos.Count != cantidadesPorProducto.Count) return BadRequest("Uno o más productos no existen.");
 
-        var sinStock = lineas
-            .Where(l => !productos[l.ProductoId].Activo || productos[l.ProductoId].Stock < l.Cantidad)
-            .Select(l => productos[l.ProductoId].Nombre)
+        var sinStock = cantidadesPorProducto
+            .Where(item => !productos[item.Key].Activo || productos[item.Key].Stock < item.Value)
+            .Select(item => productos[item.Key].Nombre)
             .Distinct()
             .ToList();
         if (sinStock.Count > 0)

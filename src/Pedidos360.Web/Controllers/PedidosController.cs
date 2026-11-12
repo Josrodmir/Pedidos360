@@ -37,9 +37,18 @@ public class PedidosController(ApplicationDbContext context) : Controller
     {
         if (entrada.Lineas is null || entrada.Lineas.Count == 0) ModelState.AddModelError("", "Agregue al menos un producto.");
         if (!await context.Clientes.AnyAsync(c => c.Id == entrada.ClienteId)) ModelState.AddModelError("", "Seleccione un cliente válido.");
-        var ids = entrada.Lineas?.Select(x => x.ProductoId).Distinct().ToList() ?? [];
-        var productos = await context.Productos.Where(p => ids.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
-        foreach (var l in entrada.Lineas ?? []) if (!productos.TryGetValue(l.ProductoId, out var p) || !p.Activo || p.Stock < l.Cantidad) ModelState.AddModelError("", "Un producto no está disponible o no tiene stock suficiente.");
+        var cantidadesPorProducto = (entrada.Lineas ?? [])
+            .GroupBy(linea => linea.ProductoId)
+            .ToDictionary(grupo => grupo.Key, grupo => grupo.Sum(linea => linea.Cantidad));
+        var productoIds = cantidadesPorProducto.Keys.ToList();
+        var productos = await context.Productos
+            .Where(p => productoIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
+        foreach (var item in cantidadesPorProducto)
+        {
+            if (!productos.TryGetValue(item.Key, out var producto) || !producto.Activo || producto.Stock < item.Value)
+                ModelState.AddModelError("", "Un producto no está disponible o no tiene stock suficiente.");
+        }
         if (!ModelState.IsValid) { await Clientes(); return View(entrada); }
         var pedido = new Pedido { ClienteId = entrada.ClienteId, UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
         foreach (var l in entrada.Lineas!) { var p = productos[l.ProductoId]; var baseLinea = p.Precio * l.Cantidad * (1 - l.Descuento / 100); p.Stock -= l.Cantidad; pedido.Detalles.Add(new PedidoDetalle { ProductoId=p.Id, Cantidad=l.Cantidad, PrecioUnitario=p.Precio, Descuento=l.Descuento, ImpuestoPorc=p.ImpuestoPorc, TotalLinea=baseLinea + baseLinea*p.ImpuestoPorc/100 }); }
