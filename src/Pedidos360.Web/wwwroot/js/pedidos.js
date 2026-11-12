@@ -4,6 +4,7 @@
     const lines = document.querySelector("#lineas");
     const totals = document.querySelector("#totales");
     let timer;
+    let calculationController;
 
     search?.addEventListener("input", () => {
         clearTimeout(timer);
@@ -66,24 +67,43 @@
 
         if (!orderLines.length) {
             totals.textContent = "Total: ₡0.00";
+            totals.classList.remove("text-danger", "text-muted");
             return;
         }
 
-        const response = await fetch("/api/pedidos/calcular", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderLines)
-        });
-
-        if (!response.ok) {
-            totals.textContent = await getCalculationErrorMessage(response);
-            totals.classList.add("text-danger");
-            return;
-        }
-
-        const data = await response.json();
+        calculationController?.abort();
+        const controller = new AbortController();
+        calculationController = controller;
         totals.classList.remove("text-danger");
-        totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
+        totals.classList.add("text-muted");
+        totals.textContent = "Calculando totales…";
+
+        try {
+            const response = await fetch("/api/pedidos/calcular", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderLines),
+                signal: controller.signal
+            });
+
+            if (controller !== calculationController) return;
+
+            if (!response.ok) {
+                totals.textContent = await getCalculationErrorMessage(response);
+                totals.classList.remove("text-muted");
+                totals.classList.add("text-danger");
+                return;
+            }
+
+            const data = await response.json();
+            totals.classList.remove("text-danger", "text-muted");
+            totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
+        } catch (error) {
+            if (error.name === "AbortError" || controller !== calculationController) return;
+            totals.textContent = "No se pudieron calcular los totales. Intente nuevamente.";
+            totals.classList.remove("text-muted");
+            totals.classList.add("text-danger");
+        }
     }
 
     async function getCalculationErrorMessage(response) {
@@ -91,10 +111,21 @@
         const contentType = response.headers.get("content-type") || "";
 
         if (!contentType.includes("application/json")) {
-            return (await response.text()) || fallback;
+            if (response.status === 401 || response.status === 403) {
+                return "Su sesión no tiene permiso para calcular el pedido.";
+            }
+            if (response.status >= 500) {
+                return "No fue posible calcular los totales en este momento. Intente nuevamente.";
+            }
+            return fallback;
         }
 
-        const problem = await response.json();
+        let problem;
+        try {
+            problem = await response.json();
+        } catch {
+            return fallback;
+        }
         if (problem.errors) {
             const fields = Object.keys(problem.errors).join(" ").toLowerCase();
             if (fields.includes("cantidad")) {
