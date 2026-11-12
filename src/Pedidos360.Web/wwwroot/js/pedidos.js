@@ -166,7 +166,7 @@
         if (problem.errors) {
             const fields = Object.keys(problem.errors).join(" ").toLowerCase();
             if (fields.includes("cantidad")) {
-                return "La cantidad debe estar entre 1 y 9 999 unidades.";
+                return "La cantidad debe ser mayor que cero.";
             }
             if (fields.includes("descuento")) {
                 return "El descuento debe ser un porcentaje entre 0 y 100.";
