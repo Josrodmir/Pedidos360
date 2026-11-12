@@ -3,7 +3,7 @@
     ViewData["Title"] = "Usuarios y roles";
     var roles = (IReadOnlyList<string>)ViewBag.Roles;
 }
-<div class="page-heading"><h1>Usuarios y roles</h1><p>Solo Administración puede asignar el perfil de cada colaborador.</p></div>
+<div class="page-heading d-flex justify-content-between align-items-start"><div><h1>Usuarios y roles</h1><p>Solo Administración puede crear cuentas y asignar el perfil de cada colaborador.</p></div><a asp-action="Create" class="btn btn-primary">+ Nuevo usuario</a></div>
 <form method="get" class="panel-card p-3 mb-3"><div class="row g-2 align-items-end"><div class="col-md-6"><label class="form-label" for="busqueda">Buscar usuario</label><input id="busqueda" name="busqueda" class="form-control" value="@ViewBag.Busqueda" placeholder="Correo o nombre de usuario" /></div><div class="col-md-3"><label class="form-label" for="rol">Filtrar por rol</label><select id="rol" name="rol" class="form-select"><option value="">Todos los roles</option>@foreach (var rol in roles) { <option value="@rol" selected="@(rol == ViewBag.RolSeleccionado)">@rol</option> }</select></div><div class="col-md-auto d-flex gap-2"><button class="btn btn-outline-primary" type="submit">Buscar</button><a class="btn btn-outline-secondary" asp-action="Index">Limpiar</a></div></div></form>
 <div class="panel-card p-4"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Correo</th><th>Rol actual</th><th>Nuevo rol</th></tr></thead><tbody>
 @if (Model.Any()) { foreach (var usuario in Model)

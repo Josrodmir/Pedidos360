@@ -37,6 +37,55 @@ public class UsuariosController(UserManager<IdentityUser> userManager, RoleManag
         return View(modelo);
     }
 
+    public IActionResult Create()
+    {
+        ViewBag.Roles = AppRoles.Lista;
+        return View(new CrearUsuarioViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CrearUsuarioViewModel modelo)
+    {
+        if (!AppRoles.Lista.Contains(modelo.Rol) || !await roleManager.RoleExistsAsync(modelo.Rol))
+            ModelState.AddModelError(nameof(modelo.Rol), "El rol seleccionado no es válido.");
+
+        if (await userManager.FindByEmailAsync(modelo.Correo) is not null)
+            ModelState.AddModelError(nameof(modelo.Correo), "Ya existe un usuario con ese correo.");
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Roles = AppRoles.Lista;
+            return View(modelo);
+        }
+
+        var usuario = new IdentityUser
+        {
+            UserName = modelo.Correo,
+            Email = modelo.Correo,
+            EmailConfirmed = true
+        };
+        var crear = await userManager.CreateAsync(usuario, modelo.Contrasena);
+        if (!crear.Succeeded)
+        {
+            foreach (var error in crear.Errors) ModelState.AddModelError(string.Empty, error.Description);
+            ViewBag.Roles = AppRoles.Lista;
+            return View(modelo);
+        }
+
+        var asignarRol = await userManager.AddToRoleAsync(usuario, modelo.Rol);
+        if (!asignarRol.Succeeded)
+        {
+            await userManager.DeleteAsync(usuario);
+            foreach (var error in asignarRol.Errors) ModelState.AddModelError(string.Empty, error.Description);
+            ViewBag.Roles = AppRoles.Lista;
+            return View(modelo);
+        }
+
+        TempData["Success"] = $"Usuario creado y asignado al rol {modelo.Rol}.";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CambiarRol(string usuarioId, string rol)
