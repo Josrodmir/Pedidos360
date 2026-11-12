@@ -31,7 +31,7 @@
         lines.insertAdjacentHTML("beforeend", `
             <tr data-id="${button.dataset.id}">
                 <td>${button.dataset.name}<input type="hidden" value="${button.dataset.id}"></td>
-                <td><input class="form-control calc" type="number" min="1" value="1"></td>
+                <td><input class="form-control calc" type="number" min="1" max="9999" value="1"></td>
                 <td><input class="form-control calc" type="number" min="0" max="100" value="0"></td>
                 <td><button type="button" class="btn btn-sm btn-outline-danger quitar" aria-label="Quitar producto">×</button></td>
             </tr>`);
@@ -76,8 +76,7 @@
         });
 
         if (!response.ok) {
-            const message = await response.text();
-            totals.textContent = message || "No se pudieron calcular los totales. Revise las cantidades.";
+            totals.textContent = await getCalculationErrorMessage(response);
             totals.classList.add("text-danger");
             return;
         }
@@ -85,5 +84,27 @@
         const data = await response.json();
         totals.classList.remove("text-danger");
         totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
+    }
+
+    async function getCalculationErrorMessage(response) {
+        const fallback = "No se pudieron calcular los totales. Revise las cantidades y descuentos.";
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+            return (await response.text()) || fallback;
+        }
+
+        const problem = await response.json();
+        if (problem.errors) {
+            const fields = Object.keys(problem.errors).join(" ").toLowerCase();
+            if (fields.includes("cantidad")) {
+                return "La cantidad debe estar entre 1 y 9 999 unidades.";
+            }
+            if (fields.includes("descuento")) {
+                return "El descuento debe ser un porcentaje entre 0 y 100.";
+            }
+        }
+
+        return problem.detail || problem.title || fallback;
     }
 })();
