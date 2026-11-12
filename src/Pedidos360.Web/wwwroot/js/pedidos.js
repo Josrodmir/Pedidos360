@@ -3,6 +3,8 @@
     const results = document.querySelector("#resultados");
     const lines = document.querySelector("#lineas");
     const totals = document.querySelector("#totales");
+    const orderForm = document.querySelector("#pedidoForm");
+    const confirmButton = orderForm?.querySelector("button[type='submit'], button:not([type])");
     let timer;
     let calculationController;
 
@@ -20,7 +22,7 @@
 
         const products = await response.json();
         results.innerHTML = products.map(product =>
-            `<button type="button" class="list-group-item" data-id="${product.id}" data-name="${product.nombre}">
+            `<button type="button" class="list-group-item" data-id="${product.id}" data-name="${product.nombre}" data-stock="${product.stock}">
                 ${product.nombre} · ₡${product.precio.toFixed(2)} · stock ${product.stock}
              </button>`).join("");
     }
@@ -30,9 +32,9 @@
         if (!button || lines.querySelector(`[data-id="${button.dataset.id}"]`)) return;
 
         lines.insertAdjacentHTML("beforeend", `
-            <tr data-id="${button.dataset.id}">
+            <tr data-id="${button.dataset.id}" data-name="${button.dataset.name}" data-stock="${button.dataset.stock}">
                 <td>${button.dataset.name}<input type="hidden" value="${button.dataset.id}"></td>
-                <td><input class="form-control calc" type="number" min="1" max="9999" value="1"></td>
+                <td><input class="form-control calc" type="number" min="1" max="${button.dataset.stock}" value="1"></td>
                 <td><input class="form-control calc" type="number" min="0" max="100" value="0"></td>
                 <td><button type="button" class="btn btn-sm btn-outline-danger quitar" aria-label="Quitar producto">×</button></td>
             </tr>`);
@@ -48,6 +50,13 @@
         event.target.closest("tr").remove();
         reindexLines();
         calculate();
+    });
+
+    orderForm?.addEventListener("submit", event => {
+        if (!lines.children.length || confirmButton?.disabled || totals.classList.contains("text-danger")) {
+            event.preventDefault();
+            if (!lines.children.length) showCalculationError("Agregue al menos un producto antes de confirmar.");
+        }
     });
 
     function reindexLines() {
@@ -68,6 +77,14 @@
         if (!orderLines.length) {
             totals.textContent = "Total: ₡0.00";
             totals.classList.remove("text-danger", "text-muted");
+            setConfirmEnabled(false);
+            return;
+        }
+
+        const stockError = getStockValidationError();
+        if (stockError) {
+            calculationController?.abort();
+            showCalculationError(stockError);
             return;
         }
 
@@ -77,6 +94,7 @@
         totals.classList.remove("text-danger");
         totals.classList.add("text-muted");
         totals.textContent = "Calculando totales…";
+        setConfirmEnabled(false);
 
         try {
             const response = await fetch("/api/pedidos/calcular", {
@@ -89,28 +107,47 @@
             if (controller !== calculationController) return;
 
             if (!response.ok) {
-                totals.textContent = await getCalculationErrorMessage(response);
-                totals.classList.remove("text-muted");
-                totals.classList.add("text-danger");
+                showCalculationError(await getCalculationErrorMessage(response));
                 return;
             }
 
             const data = await response.json();
             totals.classList.remove("text-danger", "text-muted");
             totals.textContent = `Subtotal: ₡${data.subtotal.toFixed(2)} · Impuestos: ₡${data.impuestos.toFixed(2)} · Total: ₡${data.total.toFixed(2)}`;
+            setConfirmEnabled(true);
         } catch (error) {
             if (error.name === "AbortError" || controller !== calculationController) return;
-            totals.textContent = "No se pudieron calcular los totales. Intente nuevamente.";
-            totals.classList.remove("text-muted");
-            totals.classList.add("text-danger");
+            showCalculationError("No se pudieron calcular los totales. Intente nuevamente.");
         }
+    }
+
+    function getStockValidationError() {
+        for (const row of lines.children) {
+            const quantity = Number(row.querySelector(".calc").value);
+            const stock = Number(row.dataset.stock);
+            if (Number.isFinite(stock) && quantity > stock) {
+                return `Stock insuficiente para ${row.dataset.name}. Disponibles: ${stock}.`;
+            }
+        }
+        return null;
+    }
+
+    function showCalculationError(message) {
+        totals.textContent = message;
+        totals.classList.remove("text-muted");
+        totals.classList.add("text-danger");
+        setConfirmEnabled(false);
+    }
+
+    function setConfirmEnabled(enabled) {
+        if (confirmButton) confirmButton.disabled = !enabled;
     }
 
     async function getCalculationErrorMessage(response) {
         const fallback = "No se pudieron calcular los totales. Revise las cantidades y descuentos.";
         const contentType = response.headers.get("content-type") || "";
 
-        if (!contentType.includes("application/json")) {
+        if (!contentType.includes("json")) {
             if (response.status === 401 || response.status === 403) {
                 return "Su sesión no tiene permiso para calcular el pedido.";
             }
