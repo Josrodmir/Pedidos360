@@ -11,6 +11,9 @@ namespace Pedidos360.Web.Controllers;
 public class ApiPedidosController(ApplicationDbContext context) : ControllerBase
 {
     [HttpPost("calcular")]
+    // El cálculo es una consulta de solo lectura: no crea pedidos ni descuenta stock.
+    // La operación que modifica datos continúa protegida en PedidosController.Create.
+    [AllowAnonymous]
     public async Task<IActionResult> Calcular([FromBody] List<LineaPedidoEntrada>? lineas)
     {
         if (lineas is null || lineas.Count == 0) return BadRequest("Agregue al menos un producto.");
