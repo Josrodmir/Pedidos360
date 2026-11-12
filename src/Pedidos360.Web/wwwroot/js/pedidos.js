@@ -10,12 +10,6 @@
         timer = setTimeout(searchProducts, 250);
     });
 
-    // Al enfocar el control mostramos las opciones disponibles. Así conserva la
-    // búsqueda AJAX, pero también funciona visualmente como un desplegable.
-    search?.addEventListener("focus", () => {
-        if (!results.children.length) searchProducts();
-    });
-
     async function searchProducts() {
         const response = await fetch(`/api/productos/buscar?q=${encodeURIComponent(search.value)}`);
         if (!response.ok) {
@@ -24,12 +18,10 @@
         }
 
         const products = await response.json();
-        results.innerHTML = products.length
-            ? products.map(product =>
+        results.innerHTML = products.map(product =>
             `<button type="button" class="list-group-item" data-id="${product.id}" data-name="${product.nombre}">
                 ${product.nombre} · ₡${product.precio.toFixed(2)} · stock ${product.stock}
-             </button>`).join("")
-            : '<div class="list-group-item text-muted">No hay productos disponibles con existencias.</div>';
+             </button>`).join("");
     }
 
     results?.addEventListener("click", event => {
